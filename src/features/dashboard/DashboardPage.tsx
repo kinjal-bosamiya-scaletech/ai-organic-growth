@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Callout } from "@/components/common/Callout";
 import { PageLoader } from "@/components/common/PageLoader";
 import { QueryErrorFallback } from "@/components/common/QueryErrorFallback";
 import { GeoPerformanceCard } from "@/features/dashboard/components/GeoPerformanceCard";
@@ -10,9 +11,11 @@ import { MetricsRow } from "@/features/dashboard/components/MetricsRow";
 import { PerformanceCard } from "@/features/dashboard/components/PerformanceCard";
 import { TopContentCard } from "@/features/dashboard/components/TopContentCard";
 import { useActiveProject } from "@/hooks/useActiveProject";
+import { useReconnectGoogleAccount } from "@/hooks/useReconnectGoogleAccount";
 import { useRecommendations } from "@/hooks/queries/useRecommendations";
 import { useSeoAnalysis } from "@/hooks/queries/useSeoAnalysis";
 import { useGscSnapshot, useSyncGscSnapshot } from "@/hooks/queries/useDashboard";
+import { isGscGrantExpiredError } from "@/lib/gscConnection";
 
 /** Short relative-time label ("just now", "5m ago", "3h ago", "2d ago") with no date library. */
 function timeAgo(iso: string): string {
@@ -46,26 +49,35 @@ export function DashboardPage() {
   const gscSnapshotQuery = useGscSnapshot(project.id);
   const syncGscSnapshotMutation = useSyncGscSnapshot(project.id);
 
-  const isLoading = recommendationsQuery.isLoading || seoQuery.isLoading || gscSnapshotQuery.isLoading;
-  const isError = recommendationsQuery.isError || seoQuery.isError || gscSnapshotQuery.isError;
+  const retryAll = () => {
+    recommendationsQuery.refetch();
+    seoQuery.refetch();
+    gscSnapshotQuery.refetch();
+  };
 
+  const { connect: reconnect, isConnecting } = useReconnectGoogleAccount(retryAll);
+
+  const isLoading = recommendationsQuery.isLoading || seoQuery.isLoading || gscSnapshotQuery.isLoading;
   if (isLoading) return <PageLoader label="Loading dashboard…" />;
-  if (isError || !seoQuery.data || !recommendationsQuery.data || !gscSnapshotQuery.data) {
-    return (
-      <QueryErrorFallback
-        message="We couldn't load the dashboard."
-        onRetry={() => {
-          recommendationsQuery.refetch();
-          seoQuery.refetch();
-          gscSnapshotQuery.refetch();
-        }}
-      />
-    );
+
+  // An expired Google grant makes every Search Console read fail with 409. It has its own
+  // recovery path (reconnect), so it never falls through to the generic "Try again" fallback.
+  const grantExpired =
+    isGscGrantExpiredError(recommendationsQuery.error) ||
+    isGscGrantExpiredError(seoQuery.error) ||
+    isGscGrantExpiredError(gscSnapshotQuery.error);
+
+  // Only blank the whole page when nothing usable came back; a single failed query no
+  // longer hides the sections its siblings returned fine.
+  if (!grantExpired && seoQuery.isError && gscSnapshotQuery.isError) {
+    return <QueryErrorFallback message="We couldn't load the dashboard." onRetry={retryAll} />;
   }
 
   const seo = seoQuery.data;
-  const snapshot = gscSnapshotQuery.data;
-  const openIssuesCount = seo.issues.filter((issue) => issue.status === "Open").length;
+  const snapshotData = gscSnapshotQuery.data?.data;
+  const syncedAt = gscSnapshotQuery.data?.syncedAt;
+  const quickWins = recommendationsQuery.data?.filter((r) => r.effort === "Low").length ?? 0;
+  const openIssuesCount = seo?.issues.filter((issue) => issue.status === "Open").length ?? 0;
 
   const syncButton = (
     <Button
@@ -79,56 +91,76 @@ export function DashboardPage() {
     </Button>
   );
 
-  // Everything below is served entirely from the last saved GSC snapshot — nothing here
-  // triggers a live Search Console call; only the "Sync GSC data" button does that.
-  if (!snapshot.data) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-24 text-center">
-        <p className="text-sm text-muted-foreground">
-          No Search Console data has been synced yet for <b className="text-foreground">{project.domain}</b>.
-        </p>
-        {syncButton}
-      </div>
-    );
-  }
-
-  const { metrics, trend, geo, keywords, pages } = snapshot.data;
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">
           Organic search overview for <b className="text-foreground">{project.domain}</b>
-          {snapshot.syncedAt && (
-            <> · synced {formatSyncedAt(snapshot.syncedAt)} ({timeAgo(snapshot.syncedAt)})</>
-          )}
+          {syncedAt && <> · synced {formatSyncedAt(syncedAt)} ({timeAgo(syncedAt)})</>}
         </p>
         {syncButton}
       </div>
 
-      <MetricsRow metrics={metrics} trend={trend} />
+      {grantExpired && (
+        <Callout tone="negative" title="Your Google Search Console connection has expired.">
+          <p>Reconnect your Google account to restore this dashboard.</p>
+          <Button size="sm" className="mt-2.5" onClick={reconnect} disabled={isConnecting}>
+            {isConnecting ? "Reconnecting…" : "Reconnect Google"}
+          </Button>
+        </Callout>
+      )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.9fr_1fr]">
-        <PerformanceCard title="Search performance" trend={trend} />
-        <HealthScoreCard
-          score={seo.healthScore}
-          indexed={`${seo.indexing.indexed.toLocaleString()} / ${seo.indexing.discovered.toLocaleString()}`}
-          openIssues={openIssuesCount}
-          quickWins={recommendationsQuery.data.filter((r) => r.effort === "Low").length}
-          domainAuthority={seo.domainAuthority}
+      {snapshotData && <MetricsRow metrics={snapshotData.metrics} trend={snapshotData.trend} />}
+
+      {(snapshotData || seo) && (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.9fr_1fr]">
+          {snapshotData && <PerformanceCard title="Search performance" trend={snapshotData.trend} />}
+          {seo && (
+            <HealthScoreCard
+              score={seo.healthScore}
+              indexed={`${seo.indexing.indexed.toLocaleString()} / ${seo.indexing.discovered.toLocaleString()}`}
+              openIssues={openIssuesCount}
+              quickWins={quickWins}
+              domainAuthority={seo.domainAuthority}
+            />
+          )}
+        </div>
+      )}
+
+      {seo && (
+        <HealthStrip
+          indexing={seo.indexing}
+          sitemap={seo.sitemap}
+          crawlIssues={seo.crawlIssues}
+          onViewIssues={() => navigate(`/app/${project.id}/seo-analysis`)}
         />
-      </div>
+      )}
 
-      <HealthStrip
-        indexing={seo.indexing}
-        sitemap={seo.sitemap}
-        crawlIssues={seo.crawlIssues}
-        onViewIssues={() => navigate(`/app/${project.id}/seo-analysis`)}
-      />
+      {snapshotData && <GeoPerformanceCard data={snapshotData.geo} />}
 
-      <GeoPerformanceCard data={geo} />
+      {snapshotData && (
+        <TopContentCard projectId={project.id} keywords={snapshotData.keywords} pages={snapshotData.pages} />
+      )}
 
-      <TopContentCard projectId={project.id} keywords={keywords} pages={pages} />
+      {!snapshotData && !grantExpired && gscSnapshotQuery.isError && (
+        <QueryErrorFallback
+          message="We couldn't load your Search Console data."
+          onRetry={() => gscSnapshotQuery.refetch()}
+        />
+      )}
+
+      {!snapshotData && !grantExpired && !gscSnapshotQuery.isError && (
+        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-24 text-center">
+          <p className="text-sm text-muted-foreground">
+            No Search Console data has been synced yet for <b className="text-foreground">{project.domain}</b>.
+          </p>
+          {syncButton}
+        </div>
+      )}
+
+      {!seo && !grantExpired && seoQuery.isError && (
+        <QueryErrorFallback message="We couldn't load your SEO analysis." onRetry={() => seoQuery.refetch()} />
+      )}
     </div>
   );
 }
