@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { API_CONFIG } from "@/lib/api-endpoints";
 import { USE_MOCKS, mockDelay } from "@/lib/mockDelay";
 import { dashboardMetricsMock } from "@/mocks/data/dashboard.mock";
@@ -5,6 +6,7 @@ import { clicksSeriesMock, impressionsSeriesMock, trendLabelsMock } from "@/mock
 import { geoMock } from "@/mocks/data/geo.mock";
 import { keywordsMock } from "@/mocks/data/keywords.mock";
 import { pagesMock } from "@/mocks/data/pages.mock";
+import { projectsMock } from "@/mocks/data/projects.mock";
 import httpService from "@/services/http.service";
 import type { DashboardMetric, DashboardTrend } from "@/types/dashboard";
 import type { GeoDatum } from "@/types/geo";
@@ -38,8 +40,20 @@ export async function getDashboardGeo(projectId: string): Promise<GeoDatum[]> {
   return httpService.get<GeoDatum[]>(API_CONFIG.dashboardGeo(projectId));
 }
 
+/** Mirrors the backend's 409 for a GSC route once the project's OAuth grant has expired. */
+function gscGrantExpiredError(): AxiosError {
+  const message = "Reconnect the Google account for this project.";
+  const error = new AxiosError(message, "ERR_BAD_REQUEST");
+  error.response = { status: 409, statusText: "Conflict", data: { message }, headers: {}, config: {} as never };
+  return error;
+}
+
 export async function getGscSnapshot(projectId: string): Promise<GscSnapshot> {
-  if (USE_MOCKS) return mockDelay({ data: null, syncedAt: null });
+  if (USE_MOCKS) {
+    await mockDelay(null);
+    if (projectsMock.find((p) => p.id === projectId)?.gscGrant === "expired") throw gscGrantExpiredError();
+    return { data: null, syncedAt: null };
+  }
   return httpService.get<GscSnapshot>(API_CONFIG.gscSync(projectId));
 }
 

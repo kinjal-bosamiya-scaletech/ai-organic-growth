@@ -5,6 +5,7 @@ import { SectionCard } from "@/components/common/SectionCard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { isGscGrantExpiredError } from "@/lib/gscConnection";
 import { usePagesStatus } from "@/hooks/queries/usePagesStatus";
 import { useSyncPages } from "@/hooks/queries/useSyncPages";
 import { usePageAnalysis } from "@/hooks/queries/usePageAnalysis";
@@ -37,12 +38,12 @@ function RankCell({ page }: { page: PageStatus }) {
 type PageFilter = "all" | "indexed" | "not-indexed";
 
 function getSyncErrorMessage(error: unknown): string {
+  if (isGscGrantExpiredError(error)) {
+    return "Couldn't sync pages: your Google Search Console connection has expired. Reconnect and try again.";
+  }
   if (axios.isAxiosError(error)) {
     if (error.response?.status === 404) {
       return "Couldn't sync pages: connect this project to Google Search Console first.";
-    }
-    if (error.response?.status === 409) {
-      return "Couldn't sync pages: your Google Search Console connection has expired. Reconnect and try again.";
     }
     const message = (error.response?.data as { message?: string } | undefined)?.message;
     if (message) return `Couldn't sync pages: ${message}`;

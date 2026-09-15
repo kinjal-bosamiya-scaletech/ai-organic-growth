@@ -26,6 +26,15 @@ export function useGoogleAccountConnect({ onSuccess, onError }: UseGoogleAccount
   const popupRef = useRef<Window | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Callers pass fresh inline callbacks each render; keep them in refs so the
+  // message listener below registers once per mount instead of on every render.
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  });
+
   const cleanup = useCallback(() => {
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = null;
@@ -50,15 +59,15 @@ export function useGoogleAccountConnect({ onSuccess, onError }: UseGoogleAccount
       cleanup();
 
       if (event.data.ok) {
-        onSuccess();
+        onSuccessRef.current();
       } else {
-        onError?.(event.data.message ?? "Google connection failed.");
+        onErrorRef.current?.(event.data.message ?? "Google connection failed.");
       }
     }
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [cleanup, onSuccess, onError]);
+  }, [cleanup]);
 
   const connect = useCallback(() => {
     let connectUrl: string;
