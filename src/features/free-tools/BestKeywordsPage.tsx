@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SectionCard } from "@/components/common/SectionCard";
 import { ToolPageHeader } from "@/features/free-tools/components/ToolPageHeader";
-import { KeywordSunburstChart } from "@/features/free-tools/components/KeywordSunburstChart";
+import { KeywordBadgeList } from "@/features/free-tools/components/KeywordBadgeList";
 import { useBestKeywords } from "@/hooks/queries/useBestKeywords";
 
 // Accepts a bare domain ("example.com"), a "www." host, or a full URL with
@@ -94,7 +94,7 @@ export function BestKeywordsPage() {
           <p className="mb-3 text-2xs text-muted-foreground">
             AI-suggested ranking opportunities based on this page's actual content — not confirmed Google rankings.
           </p>
-          <KeywordSunburstChart domain={result.domain} categories={result.categories} />
+          <KeywordBadgeList domain={result.domain} categories={result.categories} />
         </SectionCard>
       ) : null}
     </div>
