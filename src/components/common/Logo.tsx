@@ -19,7 +19,7 @@ export function Logo({
   const src = variant === "badge" ? logoBadge : logoMark;
 
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
+    <div className={`flex items-center gap-2.5 justify-center ${className}`}>
       <img
         src={src}
         alt="Ranky AI"

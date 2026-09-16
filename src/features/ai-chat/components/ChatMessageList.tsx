@@ -6,9 +6,12 @@ import type { ChatMessage } from "@/types/chat";
 interface ChatMessageListProps {
   messages: ChatMessage[];
   isThinking: boolean;
+  /** False for replies that already typed themselves out on an earlier open. */
+  shouldAnimate: (id: string) => boolean;
+  onTyped: (id: string) => void;
 }
 
-export function ChatMessageList({ messages, isThinking }: ChatMessageListProps) {
+export function ChatMessageList({ messages, isThinking, shouldAnimate, onTyped }: ChatMessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -30,7 +33,12 @@ export function ChatMessageList({ messages, isThinking }: ChatMessageListProps) 
     <div ref={scrollRef} className="flex flex-1 flex-col overflow-y-auto p-5.5">
       <div ref={contentRef} className="flex flex-col gap-4">
         {messages.map((message) => (
-          <ChatMessageBubble key={message.id} message={message} />
+          <ChatMessageBubble
+            key={message.id}
+            message={message}
+            animate={shouldAnimate(message.id)}
+            onTyped={onTyped}
+          />
         ))}
         {isThinking ? (
           <div className="flex items-start gap-2.5">

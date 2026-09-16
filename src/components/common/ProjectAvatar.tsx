@@ -30,7 +30,7 @@ export function ProjectAvatar({ letter, size = "md", className }: Readonly<Proje
     <span
       aria-hidden="true"
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-md border border-border bg-secondary font-medium text-foreground",
+        "flex shrink-0 items-center justify-center rounded-lg border border-brand-soft-border bg-brand-soft font-semibold text-brand-ink",
         SIZES[size],
         className,
       )}

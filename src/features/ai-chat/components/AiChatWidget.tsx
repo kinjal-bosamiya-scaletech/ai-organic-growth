@@ -4,6 +4,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ChatComposer } from "@/features/ai-chat/components/ChatComposer";
 import { ChatMessageList } from "@/features/ai-chat/components/ChatMessageList";
+import { useTypedOnce } from "@/features/ai-chat/hooks/useTypedOnce";
 import { useAuth } from "@/hooks/useAuth";
 import { useSendChatMessage } from "@/hooks/queries/useChat";
 import { getInitialChatMessage } from "@/mocks/data/chat.mock";
@@ -44,6 +45,7 @@ export function AiChatWidget({ project }: AiChatWidgetProps) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const sendMessage = useSendChatMessage();
+  const { hasTyped, markTyped } = useTypedOnce();
   const [messages, setMessages] = useState<ChatMessage[]>([getInitialChatMessage(user?.fullName ?? "there")]);
   const [draft, setDraft] = useState("");
   const [position, setPosition] = useState<Position>(getInitialPosition);
@@ -134,7 +136,12 @@ export function AiChatWidget({ project }: AiChatWidgetProps) {
               </div>
             </div>
           </SheetHeader>
-          <ChatMessageList messages={messages} isThinking={sendMessage.isPending} />
+          <ChatMessageList
+            messages={messages}
+            isThinking={sendMessage.isPending}
+            shouldAnimate={(id) => !hasTyped(id)}
+            onTyped={markTyped}
+          />
           <ChatComposer
             draft={draft}
             onDraftChange={setDraft}

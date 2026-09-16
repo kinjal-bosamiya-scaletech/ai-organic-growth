@@ -1,12 +1,26 @@
 import { Bot, Check } from "lucide-react";
+import { useEffect } from "react";
 import { Markdown } from "@/components/common/Markdown";
 import { useTypewriter } from "@/features/ai-chat/hooks/useTypewriter";
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/types/chat";
 
-const ChatMessageBubble = ({ message }: { message: ChatMessage }) => {
+interface ChatMessageBubbleProps {
+  message: ChatMessage;
+  /** False shows the reply in full straight away — how history should read. */
+  animate?: boolean;
+  /** Fired once the reveal finishes, so the caller can stop replaying it. */
+  onTyped?: (id: string) => void;
+}
+
+const ChatMessageBubble = ({ message, animate = true, onTyped }: ChatMessageBubbleProps) => {
   const isAi = message.role === "ai";
-  const { displayedText, isTyping } = useTypewriter(message.text, isAi);
+  const shouldType = isAi && animate;
+  const { displayedText, isTyping } = useTypewriter(message.text, shouldType);
+
+  useEffect(() => {
+    if (shouldType && !isTyping) onTyped?.(message.id);
+  }, [shouldType, isTyping, message.id, onTyped]);
 
   return (
     <div className={cn("flex items-start gap-2.5", isAi ? "" : "flex-row-reverse")}>
