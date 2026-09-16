@@ -65,9 +65,8 @@ function TypewriterHighlights() {
           word now comes from opacity alone, which reads as deliberate rather
           than as a effect. */}
       <span
-        className={`inline-flex items-baseline text-2xl font-semibold tracking-tight text-ink-panel-foreground transition-opacity duration-300 ${
-          isBoosting ? 'opacity-100' : 'opacity-80'
-        }`}
+        className={`inline-flex items-baseline text-2xl font-semibold tracking-tight text-ink-panel-foreground transition-opacity duration-300 ${isBoosting ? 'opacity-100' : 'opacity-80'
+          }`}
       >
         {text}
         <span className="ml-1 inline-block h-5.5 w-0.5 animate-caret-blink bg-ink-panel-foreground" />
@@ -100,7 +99,7 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen">
-      <aside className="relative hidden flex-[1.05] flex-col justify-between overflow-hidden bg-ink-panel px-16 py-16 text-ink-panel-foreground lg:flex">
+      <aside className="relative hidden flex-[1.05] flex-col justify-center overflow-hidden bg-ink-panel px-16 py-16 text-ink-panel-foreground lg:flex">
         {/* Hand-drawn SEO sketch, inverted so the ink reads light on dark */}
         <div
           aria-hidden
@@ -117,14 +116,6 @@ export function LoginPage() {
         />
 
         <div className="relative max-w-[520px]">
-          <div className="relative mb-9 inline-flex">
-            <Logo
-              iconSize={68}
-              variant="mark"
-              textClassName="text-3xl text-ink-panel-foreground"
-              className="relative"
-            />
-          </div>
           <h1 className="mb-5 text-5xl leading-[1.03] font-semibold tracking-tight">
             When Ads Say No,{' '}
             <span className="text-ink-panel-foreground">SEO Says Go.</span>
@@ -142,18 +133,18 @@ export function LoginPage() {
           </div>
         </div>
 
-        <div className="relative pt-12">
+        {/* <div className="relative pt-12">
           <div className="mb-5 h-px w-16 bg-ink-panel-foreground/15" />
           <p className="max-w-[420px] text-sm leading-relaxed text-ink-panel-foreground/45">
             Not just another SEO tool — an AI agent that turns data into growth decisions.
           </p>
-        </div>
+        </div> */}
       </aside>
 
-      <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-background p-6 sm:p-12">
+      <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-[#202635] p-6 sm:p-12">
 
         <div className="relative w-full max-w-[400px]">
-          <Logo iconSize={44} textClassName="text-xl text-foreground" className="mb-8" />
+          <Logo iconSize={44} textClassName="text-xl text-center text-foreground " className="mb-8" />
 
           <div className="overflow-hidden rounded-xl border border-border bg-card shadow-lg">
             <div className="p-8">
