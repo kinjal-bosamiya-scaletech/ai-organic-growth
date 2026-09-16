@@ -18,12 +18,12 @@ export function SidebarNavItem({ item, projectId, isActive }: Readonly<SidebarNa
         "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors outline-none",
         "focus-visible:ring-2 focus-visible:ring-ring",
         // Was `bg-primary text-white`, which in mono becomes a heavy solid
-        // black bar — and `text-white` would be wrong in dark mode anyway,
-        // since --primary inverts to near-white there.
-        // Three monochrome-safe channels instead: an ink rule, a weight shift,
-        // and a surface tint.
+        // black bar — and `text-white` would be wrong in dark mode anyway.
+        // Three channels instead: a brand-coloured rule, a weight shift, and a
+        // surface tint. The rule uses --primary so the active item picks up the
+        // theme colour in both light and dark.
         isActive
-          ? "bg-accent font-medium text-foreground before:absolute before:inset-y-1.5 before:-left-2 before:w-0.5 before:rounded-full before:bg-foreground"
+          ? "bg-accent font-medium text-foreground before:absolute before:inset-y-1.5 before:-left-2 before:w-0.5 before:rounded-full before:bg-primary"
           : "text-muted-foreground hover:bg-accent hover:text-foreground",
       )}
     >

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import ChatMessageBubble from "@/features/ai-chat/components/ChatMessageBubble";
+import { useTypedOnce } from "@/features/ai-chat/hooks/useTypedOnce";
 import { useEditContent } from "@/hooks/queries/useContentGeneration";
 import type { GeneratedContent } from "@/types/contentGeneration";
 import type { ChatMessage } from "@/types/chat";
@@ -23,6 +24,7 @@ const WELCOME_MESSAGE: ChatMessage = {
 
 export function ArticleEditChatCard({ projectId, content, onContentChange, open, onOpenChange }: ArticleEditChatCardProps) {
   const editContent = useEditContent(projectId);
+  const { hasTyped, markTyped } = useTypedOnce();
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [draft, setDraft] = useState("");
 
@@ -74,7 +76,12 @@ export function ArticleEditChatCard({ projectId, content, onContentChange, open,
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4">
           {messages.map((message) => (
-            <ChatMessageBubble key={message.id} message={message} />
+            <ChatMessageBubble
+              key={message.id}
+              message={message}
+              animate={!hasTyped(message.id)}
+              onTyped={markTyped}
+            />
           ))}
           {editContent.isPending ? (
             <div className="flex items-start gap-2.5">

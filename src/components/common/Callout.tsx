@@ -1,9 +1,9 @@
-import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Info, Sparkles, XCircle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export type CalloutTone = "neutral" | "warning" | "positive" | "negative";
+export type CalloutTone = "neutral" | "brand" | "warning" | "positive" | "negative";
 
 interface CalloutProps {
   tone?: CalloutTone;
@@ -15,6 +15,7 @@ interface CalloutProps {
 
 const TONE_CLASSES: Record<CalloutTone, string> = {
   neutral: "border-border bg-muted [&_[data-callout-icon]]:text-muted-foreground",
+  brand: "border-brand-soft-border bg-brand-soft [&_[data-callout-icon]]:text-brand-ink",
   warning: "border-warning/25 bg-warning/8 [&_[data-callout-icon]]:text-warning",
   positive: "border-positive/25 bg-positive/8 [&_[data-callout-icon]]:text-positive",
   negative: "border-negative/25 bg-negative/8 [&_[data-callout-icon]]:text-negative",
@@ -22,6 +23,7 @@ const TONE_CLASSES: Record<CalloutTone, string> = {
 
 const TONE_ICON: Record<CalloutTone, LucideIcon> = {
   neutral: Info,
+  brand: Sparkles,
   warning: AlertTriangle,
   positive: CheckCircle2,
   negative: XCircle,
@@ -38,7 +40,7 @@ export function Callout({ tone = "neutral", title, icon, className, children }: 
   const Icon = icon ?? TONE_ICON[tone];
   return (
     <div
-      className={cn("flex items-start gap-2.5 rounded-lg border p-3.5 text-sm", TONE_CLASSES[tone], className)}
+      className={cn("flex items-start gap-2.5 rounded-xl border p-4 text-sm", TONE_CLASSES[tone], className)}
       role={tone === "negative" ? "alert" : undefined}
     >
       <Icon data-callout-icon className="mt-px size-4 shrink-0" aria-hidden="true" />

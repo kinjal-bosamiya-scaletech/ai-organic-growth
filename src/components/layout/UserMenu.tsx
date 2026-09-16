@@ -14,7 +14,7 @@ export function UserMenu() {
   return (
     <div className="border-t border-border p-3">
       <div className="flex items-center gap-2.5 px-2 py-1.5">
-        <span className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-background">
+        <span className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
           {user?.fullName?.charAt(0) ?? "?"}
         </span>
         <span className="min-w-0 flex-1">

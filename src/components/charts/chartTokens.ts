@@ -16,6 +16,8 @@ export interface ChartTokens {
   band: string;
   hairline: string;
   surface: string;
+  brand: string;
+  brandInk: string;
   positive: string;
   negative: string;
   warning: string;
@@ -29,33 +31,37 @@ export type ThemeMode = "light" | "dark";
 
 const FALLBACK: Record<ThemeMode, ChartTokens> = {
   light: {
-    ink: ["#0D1117", "#353E4A", "#646E7C", "#939DAA", "#B9C1CB"],
-    grid: "#E4E7EA",
-    tick: "#6B7481",
-    band: "#ECEDF0",
-    hairline: "#8A939F",
+    ink: ["#0B8F4C", "#64748B", "#0E9F55", "#94A3B8", "#CBD5E1"],
+    grid: "#E2E8F0",
+    tick: "#64748B",
+    band: "#F1F5F9",
+    hairline: "#94A3B8",
     surface: "#FFFFFF",
-    positive: "#0F7B4F",
-    negative: "#B42318",
-    warning: "#B54708",
-    foreground: "#0B0D10",
-    mutedForeground: "#5C6674",
-    fontSans: "'IBM Plex Sans Variable', system-ui, sans-serif",
+    brand: "#12D06A",
+    brandInk: "#078043",
+    positive: "#078043",
+    negative: "#DC2626",
+    warning: "#B45309",
+    foreground: "#0F172A",
+    mutedForeground: "#64748B",
+    fontSans: "'Inter Variable', system-ui, sans-serif",
     fontMono: "'IBM Plex Mono', ui-monospace, monospace",
   },
   dark: {
-    ink: ["#F2F4F7", "#BAC2CC", "#8A939F", "#5B6673", "#3D4550"],
-    grid: "#242A31",
-    tick: "#9AA3AF",
-    band: "#2A2F36",
-    hairline: "#5B6673",
-    surface: "#15181C",
-    positive: "#4ADE80",
-    negative: "#FB7185",
-    warning: "#FBBF5A",
-    foreground: "#F2F4F7",
-    mutedForeground: "#9AA3AF",
-    fontSans: "'IBM Plex Sans Variable', system-ui, sans-serif",
+    ink: ["#34E084", "#94A3B8", "#12D06A", "#64748B", "#334155"],
+    grid: "#1E293B",
+    tick: "#94A3B8",
+    band: "#1B2436",
+    hairline: "#64748B",
+    surface: "#131C2E",
+    brand: "#12D06A",
+    brandInk: "#34E084",
+    positive: "#34E084",
+    negative: "#F87171",
+    warning: "#FBBF24",
+    foreground: "#F1F5F9",
+    mutedForeground: "#94A3B8",
+    fontSans: "'Inter Variable', system-ui, sans-serif",
     fontMono: "'IBM Plex Mono', ui-monospace, monospace",
   },
 };
@@ -92,6 +98,8 @@ export function readChartTokens(mode: ThemeMode): ChartTokens {
     band: readVar(s, "--chart-band", fb.band, mode),
     hairline: readVar(s, "--chart-hairline", fb.hairline, mode),
     surface: readVar(s, "--card", fb.surface, mode),
+    brand: readVar(s, "--brand", fb.brand, mode),
+    brandInk: readVar(s, "--brand-ink", fb.brandInk, mode),
     positive: readVar(s, "--positive", fb.positive, mode),
     negative: readVar(s, "--negative", fb.negative, mode),
     warning: readVar(s, "--warning", fb.warning, mode),
