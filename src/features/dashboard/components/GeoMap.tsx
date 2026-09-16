@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { MapPinOff } from "lucide-react";
 import type { CircleMarker as LeafletCircleMarker } from "leaflet";
 import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
 // leaflet.css is imported from src/index.css, not here: this component is
 // React.lazy-loaded, so Vite would emit its CSS into the async chunk and inject
 // it after the main stylesheet, beating our theme overrides on every tie.
+import { EmptyState } from "@/components/common/EmptyState";
 import { useChartTheme } from "@/hooks/useChartTheme";
 import type { GeoDatum } from "@/types/geo";
 
@@ -12,26 +14,19 @@ interface GeoMapProps {
   focusedCountry: string | null;
 }
 
-/**
- * CARTO's Positron / Dark Matter basemaps are already neutral grey, so no
- * filter hack is needed. The label-free variants are used with a separate
- * labels overlay so label prominence stays under our control.
- */
-const BASEMAP = {
-  light: {
-    base: "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
-    labels: "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
-    labelOpacity: 0.55,
-  },
-  dark: {
-    base: "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
-    labels: "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
-    labelOpacity: 0.45,
-  },
-} as const;
+// The basemap defaults to OpenStreetMap's standard raster tiles: keyless and
+// unwatermarked, so the map renders without any provider account. Set
+// VITE_MAP_TILE_URL (and VITE_MAP_TILE_ATTRIBUTION) to a keyed provider — for
+// example a neutral CARTO or MapTiler style — to override it.
+const DEFAULT_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+const DEFAULT_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-const ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const TILE_URL = import.meta.env.VITE_MAP_TILE_URL || DEFAULT_TILE_URL;
+const TILE_ATTRIBUTION = import.meta.env.VITE_MAP_TILE_ATTRIBUTION || DEFAULT_ATTRIBUTION;
+// The default light tiles clash with the dark theme, so they are tinted dark in
+// dark mode. A custom provider is trusted to supply its own dark style.
+const USING_DEFAULT_TILES = !import.meta.env.VITE_MAP_TILE_URL;
 
 function MapController({
   focusedCountry,
@@ -56,8 +51,22 @@ function MapController({
 export function GeoMap({ data, focusedCountry }: Readonly<GeoMapProps>) {
   const markerRefs = useRef<Record<string, LeafletCircleMarker | null>>({});
   const { mode, tokens } = useChartTheme();
+  const [tilesFailed, setTilesFailed] = useState(false);
   const maxClicks = Math.max(...data.map((g) => g.clicks));
-  const tiles = BASEMAP[mode];
+
+  // When the basemap cannot load, degrade to a short note instead of a broken
+  // map. The country ranking beside this card still carries every figure.
+  if (tilesFailed) {
+    return (
+      <div className="flex h-full w-full items-center justify-center p-4">
+        <EmptyState
+          icon={MapPinOff}
+          title="Map unavailable"
+          description="The basemap could not load. The country ranking beside this map shows the same figures."
+        />
+      </div>
+    );
+  }
 
   return (
     <MapContainer
@@ -65,10 +74,15 @@ export function GeoMap({ data, focusedCountry }: Readonly<GeoMapProps>) {
       zoom={1.4}
       scrollWheelZoom={false}
       worldCopyJump
+      className={USING_DEFAULT_TILES && mode === "dark" ? "geo-map--dark-tiles" : undefined}
       style={{ height: "100%", width: "100%" }}
     >
-      <TileLayer key={`${mode}-base`} url={tiles.base} maxZoom={12} attribution={ATTRIBUTION} />
-      <TileLayer key={`${mode}-labels`} url={tiles.labels} maxZoom={12} opacity={tiles.labelOpacity} />
+      <TileLayer
+        url={TILE_URL}
+        maxZoom={12}
+        attribution={TILE_ATTRIBUTION}
+        eventHandlers={{ tileerror: () => setTilesFailed(true) }}
+      />
       {data.map((geo) => {
         // Area-proportional. The previous `9 + sqrt(share) * 24` offset broke
         // proportionality outright: with a 9px floor added to every bubble, a

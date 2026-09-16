@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_USE_MOCKS: string;
   readonly VITE_PUBLIC_POSTHOG_KEY: string;
   readonly VITE_PUBLIC_POSTHOG_HOST: string;
+  readonly VITE_MAP_TILE_URL?: string;
+  readonly VITE_MAP_TILE_ATTRIBUTION?: string;
 }
 
 interface ImportMeta {
