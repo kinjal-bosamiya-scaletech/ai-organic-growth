@@ -374,6 +374,12 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
 }
+/* The default light basemap is tinted to a neutral dark grey in dark mode.
+   Only the tile pane is filtered, so markers, popups and controls keep their
+   own theming. */
+.geo-map--dark-tiles .leaflet-tile-pane {
+    filter: grayscale(1) invert(1) brightness(0.9) contrast(0.95);
+}
 
 /* ---------------------------------------------------------------------
    react-toastify structural bits its own variables don't cover.
