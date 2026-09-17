@@ -141,7 +141,9 @@ export function LoginPage() {
         </div> */}
       </aside>
 
-      <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-[#202635] p-6 sm:p-12">
+      {/* bg-muted, not bg-background: in dark mode --background is the same
+          #0B1120 as the ink panel, which would erase the split. */}
+      <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-muted p-6 sm:p-12">
 
         <div className="relative w-full max-w-[400px]">
           <Logo iconSize={44} textClassName="text-xl text-center text-foreground " className="mb-8" />
