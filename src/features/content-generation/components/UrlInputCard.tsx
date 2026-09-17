@@ -1,10 +1,13 @@
 import { Loader2, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { SectionCard } from "@/components/common/SectionCard";
+import { usePagesStatus } from "@/hooks/queries/usePagesStatus";
 
 interface UrlInputCardProps {
+  projectId: string;
   onGenerateFromUrl: (url: string) => void;
   onGenerateFromTitle: (title: string) => void;
   isGenerating: boolean;
@@ -20,10 +23,18 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-export function UrlInputCard({ onGenerateFromUrl, onGenerateFromTitle, isGenerating, initialTitle }: UrlInputCardProps) {
+export function UrlInputCard({
+  projectId,
+  onGenerateFromUrl,
+  onGenerateFromTitle,
+  isGenerating,
+  initialTitle,
+}: UrlInputCardProps) {
   const [url, setUrl] = useState("");
   const [touched, setTouched] = useState(false);
   const [title, setTitle] = useState(initialTitle ?? "");
+  const { data: pages, isLoading: isPagesLoading } = usePagesStatus(projectId);
+  const pageSuggestions = useMemo(() => pages?.map((p) => p.url) ?? [], [pages]);
 
   useEffect(() => {
     if (initialTitle) setTitle(initialTitle);
@@ -32,8 +43,8 @@ export function UrlInputCard({ onGenerateFromUrl, onGenerateFromTitle, isGenerat
   const validUrl = isValidUrl(url.trim());
   const validTitle = title.trim().length > 0;
 
-  const handleUrlSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleUrlSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
     setTouched(true);
     if (!validUrl || isGenerating) return;
     onGenerateFromUrl(url.trim());
@@ -59,11 +70,14 @@ export function UrlInputCard({ onGenerateFromUrl, onGenerateFromTitle, isGenerat
         article built to drive traffic straight to that product — ready to copy-paste into your website.
       </p>
       <form onSubmit={handleUrlSubmit} className="flex flex-col gap-2 sm:flex-row">
-        <Input
+        <AutocompleteInput
           value={url}
-          onChange={(e) => setUrl(e.target.value)}
+          onChange={setUrl}
+          onSubmit={() => handleUrlSubmit()}
           onBlur={() => setTouched(true)}
-          placeholder="https://yourstore.com/products/example-product"
+          suggestions={pageSuggestions}
+          isLoading={isPagesLoading}
+          placeholder="https://yourstore.com/products/example-product or search your saved pages"
           aria-invalid={touched && !validUrl && url.length > 0}
           disabled={isGenerating}
           className="sm:flex-1"
