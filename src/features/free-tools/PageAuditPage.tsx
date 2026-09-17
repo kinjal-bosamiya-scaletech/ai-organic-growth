@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { Callout } from "@/components/common/Callout";
 import { SectionCard } from "@/components/common/SectionCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useActiveProject } from "@/hooks/useActiveProject";
 import { useCompetitorAudit, usePageAudit } from "@/hooks/queries/usePageAudit";
+import { usePagesStatus } from "@/hooks/queries/usePagesStatus";
 import { OverviewTab } from "@/features/free-tools/components/PageAudit/OverviewTab";
 import { ContentTab } from "@/features/free-tools/components/PageAudit/ContentTab";
 import { MetadataTab } from "@/features/free-tools/components/PageAudit/MetadataTab";
@@ -21,6 +22,8 @@ export function PageAuditPage() {
   const auditMutation = usePageAudit(project);
   const competitorAudit = useCompetitorAudit(project);
   const result = auditMutation.data;
+  const { data: pages, isLoading: isPagesLoading } = usePagesStatus(project.id);
+  const pageSuggestions = useMemo(() => pages?.map((p) => p.url) ?? [], [pages]);
 
   const canSubmit = pageUrl.trim().length > 0;
   const wasBlocked = result?.htmlFetchBlocked ?? false;
@@ -37,11 +40,13 @@ export function PageAuditPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex flex-1 flex-col gap-1">
             <label className="text-sm font-semibold text-foreground">Page Url</label>
-            <Input
+            <AutocompleteInput
               value={pageUrl}
-              onChange={(e) => setPageUrl(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
-              placeholder={`https://${project.domain}/your-page/`}
+              onChange={setPageUrl}
+              onSubmit={handleAnalyze}
+              suggestions={pageSuggestions}
+              isLoading={isPagesLoading}
+              placeholder={`https://${project.domain}/your-page/ or search your saved pages`}
               className="h-9"
             />
           </div>

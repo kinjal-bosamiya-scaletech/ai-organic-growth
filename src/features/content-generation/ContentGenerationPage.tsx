@@ -43,6 +43,7 @@ export function ContentGenerationPage() {
   return (
     <div className="flex flex-col gap-5">
       <UrlInputCard
+        projectId={project.id}
         initialTitle={initialTitle}
         onGenerateFromUrl={(url) => urlMutation.mutate(url, { onSuccess: setContent })}
         onGenerateFromTitle={(title) => titleMutation.mutate(title, { onSuccess: setContent })}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -8,8 +8,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { SectionCard } from "@/components/common/SectionCard";
 import { usePageAnalysis } from "@/hooks/queries/usePageAnalysis";
+import { usePagesStatus } from "@/hooks/queries/usePagesStatus";
 import { PageAnalysisResult } from "@/features/seo-analysis/components/PageAnalysisResult";
 import { buildPageAnalysisDoc, downloadHtmlAsDoc } from "@/lib/exportDocument";
 
@@ -20,6 +22,8 @@ export function PageAnalyzerCard({ projectId }: { projectId: string }) {
   const [showManualHtml, setShowManualHtml] = useState(false);
   const analysisMutation = usePageAnalysis(projectId);
   const analysis = analysisMutation.data;
+  const { data: pages, isLoading: isPagesLoading } = usePagesStatus(projectId);
+  const pageSuggestions = useMemo(() => pages?.map((p) => p.url) ?? [], [pages]);
 
   const wasBlocked = analysis?.htmlFetchBlocked ?? false;
 
@@ -53,11 +57,13 @@ export function PageAnalyzerCard({ projectId }: { projectId: string }) {
       </p>
       <div className="flex flex-col gap-2">
         <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-          <Input
+          <AutocompleteInput
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
-            placeholder="https://yoursite.com/some-page"
+            onChange={setUrl}
+            onSubmit={handleAnalyze}
+            suggestions={pageSuggestions}
+            isLoading={isPagesLoading}
+            placeholder="https://yoursite.com/some-page or search your saved pages"
             className="h-9 flex-1"
           />
           <span className="shrink-0 text-xs font-semibold text-muted-foreground sm:px-1">

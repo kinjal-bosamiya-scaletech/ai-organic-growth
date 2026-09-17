@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { SectionCard } from "@/components/common/SectionCard";
 import { ToolPageHeader } from "@/features/free-tools/components/ToolPageHeader";
 import { KeywordBadgeList } from "@/features/free-tools/components/KeywordBadgeList";
 import { useBestKeywords } from "@/hooks/queries/useBestKeywords";
+import { usePagesStatus } from "@/hooks/queries/usePagesStatus";
+import { useActiveProject } from "@/hooks/useActiveProject";
 
 // Accepts a bare domain ("example.com"), a "www." host, or a full URL with
 // scheme/path/query — anything that resolves to a real-looking hostname with a TLD.
@@ -28,6 +30,9 @@ export function BestKeywordsPage() {
   const [touched, setTouched] = useState(false);
   const keywordsMutation = useBestKeywords();
   const result = keywordsMutation.data;
+  const project = useActiveProject();
+  const { data: pages, isLoading: isPagesLoading } = usePagesStatus(project.id);
+  const pageSuggestions = useMemo(() => pages?.map((p) => p.url) ?? [], [pages]);
 
   const isValid = useMemo(() => isValidWebsiteUrl(url), [url]);
   const showValidationError = touched && url.trim().length > 0 && !isValid;
@@ -50,12 +55,14 @@ export function BestKeywordsPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex flex-1 flex-col gap-1">
             <label className="text-sm font-semibold text-foreground">Website URL</label>
-            <Input
+            <AutocompleteInput
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={setUrl}
+              onSubmit={handleSubmit}
               onBlur={() => setTouched(true)}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              placeholder="https://example.com"
+              suggestions={pageSuggestions}
+              isLoading={isPagesLoading}
+              placeholder="https://example.com or search your saved pages"
               className="h-9"
               aria-invalid={showValidationError}
             />
