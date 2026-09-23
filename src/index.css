@@ -422,6 +422,12 @@
     font-family: var(--font-sans);
     font-size: var(--text-sm);
     outline: none;
+    /* Leaflet's panes and controls sit at z-index 400-1000, which floats them
+       over dialogs, sheets and dropdowns. Isolating the container keeps those
+       values scoped to the map instead of the page. */
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
 }
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
