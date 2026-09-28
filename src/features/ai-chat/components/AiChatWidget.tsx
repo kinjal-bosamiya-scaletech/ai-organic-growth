@@ -4,6 +4,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ChatComposer } from "@/features/ai-chat/components/ChatComposer";
 import { ChatMessageList } from "@/features/ai-chat/components/ChatMessageList";
+import { useTypedOnce } from "@/features/ai-chat/hooks/useTypedOnce";
 import { useAuth } from "@/hooks/useAuth";
 import { useSendChatMessage } from "@/hooks/queries/useChat";
 import { getInitialChatMessage } from "@/mocks/data/chat.mock";
@@ -44,7 +45,8 @@ export function AiChatWidget({ project }: AiChatWidgetProps) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const sendMessage = useSendChatMessage();
-  const [messages, setMessages] = useState<ChatMessage[]>([getInitialChatMessage(user?.name ?? "there")]);
+  const { hasTyped, markTyped } = useTypedOnce();
+  const [messages, setMessages] = useState<ChatMessage[]>([getInitialChatMessage(user?.fullName ?? "there")]);
   const [draft, setDraft] = useState("");
   const [position, setPosition] = useState<Position>(getInitialPosition);
   const dragRef = useRef<{ startX: number; startY: number; originX: number; originY: number; dragged: boolean } | null>(null);
@@ -113,7 +115,7 @@ export function AiChatWidget({ project }: AiChatWidgetProps) {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        title="Ask Organiq AI · drag to move"
+        title="Ask Ranky AI · drag to move"
         style={{ left: position.x, top: position.y }}
         className="fixed z-40 flex size-14 cursor-grab touch-none items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 active:cursor-grabbing"
       >
@@ -127,14 +129,19 @@ export function AiChatWidget({ project }: AiChatWidgetProps) {
               <Bot className="size-[18px]" />
             </span>
             <div>
-              <SheetTitle>Organiq AI</SheetTitle>
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+              <SheetTitle>Ranky AI</SheetTitle>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <span className="size-1.5 rounded-full bg-primary" />
                 Online · SEO Assistant
               </div>
             </div>
           </SheetHeader>
-          <ChatMessageList messages={messages} isThinking={sendMessage.isPending} />
+          <ChatMessageList
+            messages={messages}
+            isThinking={sendMessage.isPending}
+            shouldAnimate={(id) => !hasTyped(id)}
+            onTyped={markTyped}
+          />
           <ChatComposer
             draft={draft}
             onDraftChange={setDraft}

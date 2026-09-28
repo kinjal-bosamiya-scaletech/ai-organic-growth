@@ -26,7 +26,7 @@ export function CopyButton({ text, label = "Copy", className }: CopyButtonProps)
 
   return (
     <Button type="button" variant="outline" size="sm" className={cn("gap-1.5", className)} onClick={handleCopy}>
-      {copied ? <Check className="text-primary" /> : <Copy />}
+      {copied ? <Check className="text-positive" /> : <Copy />}
       {copied ? "Copied" : label}
     </Button>
   );

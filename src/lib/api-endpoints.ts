@@ -18,8 +18,10 @@ export const API_CONFIG = {
   seoAnalysis: (projectId: string) => `projects/${projectId}/seo-analysis`,
   chat: (projectId: string) => `projects/${projectId}/chat`,
   contentGeneration: (projectId: string) => `projects/${projectId}/content-generation`,
+  contentGenerationFromTitle: (projectId: string) => `projects/${projectId}/content-generation/from-title`,
   contentGenerationPlagiarism: (projectId: string) => `projects/${projectId}/content-generation/plagiarism-check`,
   contentGenerationEdit: (projectId: string) => `projects/${projectId}/content-generation/edit`,
+  titleGenerator: (projectId: string) => `projects/${projectId}/title-generator`,
   linkGap: (projectId: string) => `projects/${projectId}/link-gap`,
   pageAudit: (projectId: string) => `projects/${projectId}/page-audit`,
   pageAuditCompetitor: (projectId: string) => `projects/${projectId}/page-audit/competitor`,
@@ -29,6 +31,12 @@ export const API_CONFIG = {
   gscSync: (projectId: string) => `projects/${projectId}/gsc-sync`,
   coreWebVitals: "core-web-vitals",
   builtWith: "built-with",
+  bestKeywords: "best-keywords",
+  users: "users",
+  roles: "roles",
+  activitySummary: "activity/summary",
+  activityLogs: "activity/logs",
+  activityErrors: "activity/errors",
 };
 
 /**

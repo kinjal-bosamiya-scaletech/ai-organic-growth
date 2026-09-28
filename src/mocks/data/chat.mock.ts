@@ -4,7 +4,7 @@ export function getInitialChatMessage(name: string): ChatMessage {
   return {
     id: "msg-welcome",
     role: "ai",
-    text: `Hi ${name} — I'm **Organiq AI**, your SEO assistant. I'm connected to live Search Console data for your site and can help you:\n- Diagnose **indexing & crawl** issues\n- Find **keyword** opportunities close to page one\n- Track **Core Web Vitals** and site speed\n- Compare you to **competitors**\n- Explain **traffic** changes\n\nAsk me anything, or tap a suggestion below to get started.`,
+    text: `Hi ${name} — I'm **Ranky AI**, your SEO assistant. I'm connected to live Search Console data for your site and can help you:\n- Diagnose **indexing & crawl** issues\n- Find **keyword** opportunities close to page one\n- Track **Core Web Vitals** and site speed\n- Compare you to **competitors**\n- Explain **traffic** changes\n\nAsk me anything, or tap a suggestion below to get started.`,
   };
 }
 

@@ -31,13 +31,13 @@ export function GeoPerformanceCard({ data }: GeoPerformanceCardProps) {
       title="Search performance by region"
       action={
         topCountrySummary ? (
-          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
+          <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
             {topCountrySummary}
           </span>
         ) : undefined
       }
     >
-      <p className="-mt-3 mb-3.5 text-[13px] text-muted-foreground">
+      <p className="-mt-3 mb-3.5 text-sm text-muted-foreground">
         Clicks &amp; impressions by country · last 28 days · tap a country to zoom
       </p>
       <div className="grid grid-cols-1 gap-4.5 lg:grid-cols-[1.7fr_1fr]">

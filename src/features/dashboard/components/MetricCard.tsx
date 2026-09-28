@@ -5,16 +5,17 @@ import type { DashboardMetric } from "@/types/dashboard";
 interface MetricCardProps {
   metric: DashboardMetric;
   sparklineData?: number[];
-  sparklineColor?: string;
+  lowerIsBetter?: boolean;
 }
 
-export function MetricCard({ metric, sparklineData, sparklineColor = "#12A150" }: MetricCardProps) {
+export function MetricCard({ metric, sparklineData, lowerIsBetter }: Readonly<MetricCardProps>) {
   return (
     <StatCard
       label={metric.label}
       value={metric.value}
       change={metric.change}
-      footer={sparklineData ? <SparklineChart data={sparklineData} color={sparklineColor} /> : undefined}
+      lowerIsBetter={lowerIsBetter}
+      footer={sparklineData ? <SparklineChart data={sparklineData} /> : undefined}
     />
   );
 }

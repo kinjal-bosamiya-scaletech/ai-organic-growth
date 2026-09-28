@@ -1,18 +1,15 @@
 import { SectionCard } from "@/components/common/SectionCard";
 import { Progress } from "@/components/ui/progress";
+import { STATUS_FILL, STATUS_ICON, STATUS_PILL, STATUS_TEXT, scoreStatus } from "@/lib/score";
+import type { ScoreStatus } from "@/lib/score";
 import type { CwvMetric } from "@/types/seo";
 
-const STATUS_CLASSES: Record<CwvMetric["status"], string> = {
-  Good: "bg-primary/10 text-primary",
-  "Needs work": "bg-brand-medium/10 text-brand-medium",
-  Poor: "bg-destructive/10 text-destructive",
+/** Maps the API's status wording onto the shared status vocabulary. */
+const CWV_STATUS: Record<CwvMetric["status"], ScoreStatus> = {
+  Good: "good",
+  "Needs work": "warn",
+  Poor: "bad",
 };
-
-function scoreColorClass(score: number): string {
-  if (score >= 90) return "text-primary";
-  if (score >= 50) return "text-brand-medium";
-  return "text-destructive";
-}
 
 interface CoreWebVitalsCardProps {
   metrics: CwvMetric[];
@@ -26,27 +23,34 @@ export function CoreWebVitalsCard({ metrics, title = "Core Web Vitals", score }:
       title={title}
       action={
         typeof score === "number" ? (
-          <span className={`text-lg font-bold ${scoreColorClass(score)}`}>{score}</span>
+          <span className={`tabular text-lg font-semibold ${STATUS_TEXT[scoreStatus(score)]}`}>{score}</span>
         ) : undefined
       }
     >
       <div className="flex flex-col gap-4">
-        {metrics.map((metric) => (
-          <div key={metric.label}>
-            <div className="mb-1.5 flex items-center justify-between text-[13px]">
-              <span className="font-semibold">
-                {metric.label} — {metric.name}
-              </span>
-              <span className="font-bold">
-                {metric.value} ·{" "}
-                <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${STATUS_CLASSES[metric.status]}`}>
-                  {metric.status}
+        {metrics.map((metric) => {
+          const status = CWV_STATUS[metric.status];
+          const StatusIcon = STATUS_ICON[status];
+          return (
+            <div key={metric.label}>
+              <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
+                <span className="font-medium">
+                  {metric.label} — {metric.name}
                 </span>
-              </span>
+                <span className="flex shrink-0 items-center gap-2">
+                  <span className="tabular font-medium">{metric.value}</span>
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium ${STATUS_PILL[status]}`}
+                  >
+                    <StatusIcon className="size-3" aria-hidden="true" />
+                    {metric.status}
+                  </span>
+                </span>
+              </div>
+              <Progress value={metric.percent} indicatorClassName={STATUS_FILL[status]} />
             </div>
-            <Progress value={metric.percent} className="h-1.75" />
-          </div>
-        ))}
+          );
+        })}
       </div>
     </SectionCard>
   );

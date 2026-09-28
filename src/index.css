@@ -1,144 +1,490 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Load-bearing: defines the data-open / data-closed / data-active / data-checked /
+   data-horizontal / data-vertical custom variants that tabs, dialog, sheet, progress
+   and dropdown-menu all depend on. Contributes no colours. Do not remove. */
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/plus-jakarta-sans";
-@import "@fontsource-variable/jetbrains-mono";
+/* Inter is variable (wght 100-900), so one import covers every weight the UI
+   uses (400/500/600/700). IBM Plex Mono stays for raw-HTML paste areas and code
+   only — it has no variable release, so weights are imported individually. */
+@import "@fontsource-variable/inter";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+/* Imported here, not in GeoMap.tsx: that component is React.lazy-loaded, so Vite
+   emits its CSS into the async chunk and injects it AFTER this stylesheet, which
+   would make every override below lose the cascade tie. */
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Plus Jakarta Sans Variable', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
+    /* ---------------------------------------------------------------
+       Typefaces. Inter for everything; mono is reserved for literal
+       code (the "paste your page HTML" textareas), never for data
+       labels — tabular-nums below handles numeric alignment instead.
+       --------------------------------------------------------------- */
+    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+    /* ---------------------------------------------------------------
+       Type scale. Body sits at 14px — this is a dense data product, not
+       a marketing site — with a clear four-step hierarchy above it:
+
+         page title   28px/600   --text-3xl
+         KPI figure   26px/600   --text-2xl
+         section      18px/600   --text-lg
+         body         14px       --text-base
+         supporting   12px       --text-xs
+
+       Tracking is baked in per step so scattered tracking-* utilities
+       are unnecessary. These do not vary per mode, so literal values
+       are correct here.
+       --------------------------------------------------------------- */
+    --text-2xs: 0.6875rem;              /* 11px - micro-labels, table heads, pills */
+    --text-2xs--line-height: 1rem;
+    --text-2xs--letter-spacing: 0.01em;
+    --text-xs: 0.75rem;                 /* 12px - supporting text, captions */
+    --text-xs--line-height: 1.125rem;
+    --text-xs--letter-spacing: 0.005em;
+    --text-sm: 0.8125rem;               /* 13px - dense body, table cells */
+    --text-sm--line-height: 1.25rem;
+    --text-sm--letter-spacing: 0em;
+    --text-base: 0.875rem;              /* 14px - default body */
+    --text-base--line-height: 1.375rem;
+    --text-base--letter-spacing: -0.006em;
+    --text-md: 0.9375rem;               /* 15px - lead paragraphs, page description */
+    --text-md--line-height: 1.5rem;
+    --text-md--letter-spacing: -0.009em;
+    --text-lg: 1.125rem;                /* 18px - card / section titles */
+    --text-lg--line-height: 1.625rem;
+    --text-lg--letter-spacing: -0.014em;
+    --text-xl: 1.375rem;                /* 22px - sub-headings */
+    --text-xl--line-height: 1.875rem;
+    --text-xl--letter-spacing: -0.017em;
+    --text-2xl: 1.625rem;               /* 26px - KPI figures */
+    --text-2xl--line-height: 2.125rem;
+    --text-2xl--letter-spacing: -0.021em;
+    --text-3xl: 1.75rem;                /* 28px - page H1 */
+    --text-3xl--line-height: 2.25rem;
+    --text-3xl--letter-spacing: -0.023em;
+    --text-4xl: 2.25rem;                /* 36px - gauge score */
+    --text-4xl--line-height: 2.5rem;
+    --text-4xl--letter-spacing: -0.026em;
+    --text-5xl: 3rem;                   /* 48px - login display only */
+    --text-5xl--line-height: 1.06;
+    --text-5xl--letter-spacing: -0.03em;
+
+    /* ---------------------------------------------------------------
+       Radius. Cards land at 12px, controls at 8px.
+       2xl is capped equal to xl on purpose, so existing rounded-2xl
+       call sites resolve to the card radius without editing each file.
+       Hierarchy: full=pills/dots, sm=chips, md=controls, lg=inputs,
+       xl=cards, 2xl=cards, 3xl=dialogs & sheets.
+       --------------------------------------------------------------- */
+    --radius-xs: 0.125rem;   /*  2px */
+    --radius-sm: 0.25rem;    /*  4px */
+    --radius-md: 0.5rem;     /*  8px - buttons, chips, icon tiles */
+    --radius-lg: 0.625rem;   /* 10px - inputs, nav items */
+    --radius-xl: 0.75rem;    /* 12px - cards */
+    --radius-2xl: 0.75rem;   /* 12px - capped == xl, deliberately */
+    --radius-3xl: 0.875rem;  /* 14px - dialogs, sheets, drawers */
+    --radius-4xl: 1rem;      /* 16px */
+
+    /* Elevation varies per mode, so it needs the same var() indirection
+       as colour. Resting cards get NO shadow - a hairline border only;
+       shadow-xs appears on hover to signal interactivity. */
+    --shadow-xs: var(--elev-xs);
+    --shadow-sm: var(--elev-sm);
+    --shadow-md: var(--elev-md);
+    --shadow-lg: var(--elev-lg);
+    --shadow-xl: var(--elev-overlay);
+
+    /* ---------------------------------------------------------------
+       Colour. CRITICAL: every colour stays as --color-x: var(--x) with
+       the literal hex in :root / .dark. `inline` makes Tailwind emit
+       var(--x) into the utility instead of a resolved value, which is
+       exactly what lets .dark re-resolve it. Writing literal hex here
+       silently kills dark mode.
+       --------------------------------------------------------------- */
     --color-background: var(--background);
-    --color-brand-indigo: var(--brand-indigo);
-    --color-brand-high: var(--brand-high);
-    --color-brand-medium: var(--brand-medium);
-    --color-brand-low: var(--brand-low);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    /* RankyAI brand green. Five roles, because one hex cannot do all of
+       them: #12D06A is a 2.05:1 fill — excellent behind dark ink, and
+       illegible AS ink. --brand-ink is the darkened companion for green
+       text, icons and thin chart strokes on light surfaces. */
+    --color-brand: var(--brand);                      /* the fill */
+    --color-brand-hover: var(--brand-hover);
+    --color-brand-foreground: var(--brand-foreground);/* ink ON the fill */
+    --color-brand-ink: var(--brand-ink);              /* green ink on light surfaces */
+    --color-brand-soft: var(--brand-soft);            /* active nav / AI surface tint */
+    --color-brand-soft-border: var(--brand-soft-border);
+    --color-brand-accent: var(--brand-accent);        /* secondary light green */
+
+    --color-border: var(--border);
+    --color-border-strong: var(--border-strong);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    /* Reserved status. Positive deliberately shares the brand green
+       family — in this product a gain IS the brand story. */
+    --color-positive: var(--positive);
+    --color-positive-foreground: var(--positive-foreground);
+    --color-negative: var(--negative);
+    --color-negative-foreground: var(--negative-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-destructive: var(--negative);   /* alias - one red in the system */
+
+    /* Fixed-dark panel, identical in both modes (login aside). */
+    --color-ink-panel: var(--ink-panel);
+    --color-ink-panel-foreground: var(--ink-panel-foreground);
+
+    /* Chart ramp. Step 1 is the brand green and carries the primary
+       series; step 2 is slate so a two-series chart separates by hue as
+       well as lightness. Step 5 sits below 3:1 against its surface, so
+       it is legal only with a direct label or table view. */
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-chart-grid: var(--chart-grid);
+    --color-chart-tick: var(--chart-tick);
+    --color-chart-band: var(--chart-band);
+    --color-chart-hairline: var(--chart-hairline);
 }
 
 :root {
-    --background: #F6F7F9;
-    --foreground: #0E1726;
+    color-scheme: light;
+
+    /* Surfaces. Slate-tinted neutrals — a cool blue undertone that keeps
+       the green reading as the only real chroma in the product. */
+    --background: #F8FAFC;          /* canvas */
+    --foreground: #0F172A;          /* ink - 17.59 card / 16.94 canvas */
     --card: #FFFFFF;
-    --card-foreground: #0E1726;
+    --card-foreground: #0F172A;
     --popover: #FFFFFF;
-    --popover-foreground: #0E1726;
-    --primary: #12A150;
-    --primary-foreground: #FFFFFF;
-    --secondary: #EDEFF2;
-    --secondary-foreground: #0E1726;
-    --muted: #F7F8FA;
-    --muted-foreground: #6B7688;
-    --accent: #ECECFB;
-    --accent-foreground: #5B5BD6;
-    --destructive: #E5484D;
-    --border: #EAECEF;
-    --input: #EAECEF;
-    --ring: #12A150;
-    --chart-1: #12A150;
-    --chart-2: #5B5BD6;
-    --chart-3: #E0900B;
-    --chart-4: #3B82C4;
-    --chart-5: #E5484D;
-    --radius: 0.7rem;
-    --sidebar: #FFFFFF;
-    --sidebar-foreground: #0E1726;
-    --sidebar-primary: #12A150;
-    --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #F7F8FA;
-    --sidebar-accent-foreground: #0E1726;
-    --sidebar-border: #EAECEF;
-    --sidebar-ring: #12A150;
-    --brand-indigo: #5B5BD6;
-    --brand-high: #E5484D;
-    --brand-medium: #E0900B;
-    --brand-low: #3B82C4;
+    --popover-foreground: #0F172A;
+
+    --muted: #F1F5F9;               /* subtlest fill: zebra rows, chips */
+    --muted-foreground: #64748B;    /* 4.77 card / 4.60 canvas */
+    --secondary: #E2E8F0;           /* filled secondary control */
+    --secondary-foreground: #0F172A;
+    --accent: #F1F5F9;              /* hover tint - weak by design */
+    --accent-foreground: #0F172A;
+
+    /* --primary IS the brand: Button/Badge default, the AI launcher and
+       every solid brand surface read from it. Dark ink on the fill
+       rather than white — white on #12D06A is 2.05:1. */
+    --primary: #12D06A;
+    --primary-foreground: #052E1A;  /* 7.28 on primary — AAA */
+
+    --brand: #12D06A;
+    --brand-hover: #10BC60;
+    --brand-foreground: #052E1A;
+    --brand-ink: #078043;           /* 5.03 card / 4.85 canvas */
+    --brand-soft: #E7FAF0;          /* brand at ~10% over white */
+    --brand-soft-border: #BFEFD4;
+    --brand-accent: #7CE0A8;
+
+    /* Lines. --border is a decorative hairline (low contrast is correct).
+       --input delimits an interactive control, so it must clear 3:1 on
+       BOTH card and canvas: inputs are bg-transparent and several pages
+       render them directly on the canvas. 3.51 card / 3.39 canvas. */
+    --border: #E2E8F0;
+    --border-strong: #CBD5E1;       /* hover/emphasis - state without hue */
+    --input: #7C8A9C;
+    /* Green focus ring. #12D06A itself is 2.05:1 and would be an
+       invisible ring, so the ring takes the darker green: 3.64 canvas,
+       3.75 card, and 3.05 against the brand fill — no ring-offset
+       plumbing needed. */
+    --ring: #0C9A4E;
+
+    --positive: #078043;            /* 5.03 on card - same family as brand-ink */
+    --positive-foreground: #FFFFFF;
+    --negative: #DC2626;            /* 4.83 on card */
+    --negative-foreground: #FFFFFF;
+    --warning: #B45309;             /* 5.02 on card */
+    --warning-foreground: #FFFFFF;
+
+    --ink-panel: #0B1120;
+    --ink-panel-foreground: #F1F5F9;
+
+    /* Green-led ordinal ramp: step 1 green, step 2 slate (hue + lightness
+       separation for two-series charts), then a slate fade. */
+    --chart-1: #0B8F4C;             /* 4.01 on card */
+    --chart-2: #64748B;             /* 4.77 on card */
+    --chart-3: #0E9F55;             /* 3.44 on card - thin strokes, sparklines */
+    --chart-4: #94A3B8;             /* 2.91 - large marks only */
+    --chart-5: #CBD5E1;             /* below 3:1 - label or table required */
+    --chart-grid: #E2E8F0;
+    --chart-tick: #64748B;          /* 4.77 on card; 3.97 on the grid line */
+    --chart-band: #F1F5F9;          /* structural band, not a data value */
+    --chart-hairline: #94A3B8;      /* pale-fill relief border */
+
+    --elev-xs: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+    --elev-sm: 0 1px 2px -1px rgb(15 23 42 / 0.07), 0 1px 3px 0 rgb(15 23 42 / 0.05);
+    --elev-md: 0 2px 4px -2px rgb(15 23 42 / 0.06), 0 6px 14px -4px rgb(15 23 42 / 0.08);
+    --elev-lg: 0 8px 20px -8px rgb(15 23 42 / 0.10), 0 2px 6px -3px rgb(15 23 42 / 0.06);
+    --elev-overlay: 0 24px 60px -24px rgb(15 23 42 / 0.22), 0 2px 8px -3px rgb(15 23 42 / 0.08);
+
+    /* react-toastify ships its own variable system; retarget it at ours
+       rather than fighting its stylesheet. */
+    --toastify-color-light: var(--card);
+    --toastify-color-dark: var(--card);
+    --toastify-text-color-light: var(--foreground);
+    --toastify-text-color-dark: var(--foreground);
+    --toastify-color-success: var(--positive);
+    --toastify-color-error: var(--negative);
+    --toastify-color-warning: var(--warning);
+    --toastify-color-info: var(--muted-foreground);
+    --toastify-color-progress-success: var(--brand);
+    --toastify-color-progress-error: var(--negative);
+    --toastify-color-progress-warning: var(--warning);
+    --toastify-color-progress-info: var(--muted-foreground);
+    --toastify-toast-shadow: var(--elev-lg);
+    --toastify-toast-bd-radius: var(--radius-xl);
+    --toastify-font-family: var(--font-sans);
 }
 
 .dark {
-    --background: #0E1015;
-    --foreground: #F3F4F6;
-    --card: #17181D;
-    --card-foreground: #F3F4F6;
-    --popover: #17181D;
-    --popover-foreground: #F3F4F6;
+    color-scheme: dark;
+
+    --background: #0B1120;
+    --foreground: #F1F5F9;          /* 15.27 on card */
+    --card: #131C2E;
+    --card-foreground: #F1F5F9;
+    --popover: #182236;             /* one step above card so overlays separate */
+    --popover-foreground: #F1F5F9;
+
+    --muted: #182236;
+    --muted-foreground: #94A3B8;    /* 6.72 on card */
+    --secondary: #24304A;
+    --secondary-foreground: #F1F5F9;
+    --accent: #1C2739;
+    --accent-foreground: #F1F5F9;
+
+    /* The brand fill does NOT invert — a brand green that flips to slate
+       in dark mode stops being a brand. Dark ink on it stays correct in
+       both modes, since the fill is light in both. */
     --primary: #12D06A;
-    --primary-foreground: #0E1726;
-    --secondary: #23252D;
-    --secondary-foreground: #F3F4F6;
-    --muted: #1B1D24;
-    --muted-foreground: #9CA3AF;
-    --accent: #2A2A45;
-    --accent-foreground: #A5A6F6;
-    --destructive: #F87171;
-    --border: rgba(255, 255, 255, 0.1);
-    --input: rgba(255, 255, 255, 0.15);
-    --ring: #12D06A;
-    --chart-1: #12D06A;
-    --chart-2: #7C6BE8;
-    --chart-3: #F0A93B;
-    --chart-4: #5CA6E0;
-    --chart-5: #F87171;
-    --sidebar: #17181D;
-    --sidebar-foreground: #F3F4F6;
-    --sidebar-primary: #12D06A;
-    --sidebar-primary-foreground: #0E1726;
-    --sidebar-accent: #23252D;
-    --sidebar-accent-foreground: #F3F4F6;
-    --sidebar-border: rgba(255, 255, 255, 0.1);
-    --sidebar-ring: #12D06A;
-    --brand-indigo: #7C6BE8;
-    --brand-high: #F87171;
-    --brand-medium: #F0A93B;
-    --brand-low: #5CA6E0;
+    --primary-foreground: #052E1A;
+
+    --brand: #12D06A;
+    --brand-hover: #2FE283;
+    --brand-foreground: #052E1A;
+    --brand-ink: #34E084;           /* 9.55 on card - green ink needs to go UP on dark */
+    --brand-soft: #10291D;          /* brand at ~12% over the dark card */
+    --brand-soft-border: #1C4A32;
+    --brand-accent: #7CE0A8;
+
+    --border: #1E293B;              /* 1.25 on card */
+    --border-strong: #334155;
+    --input: #64748B;               /* 3.11 card / 3.40 canvas */
+    --ring: #2FE283;                /* 8.2 canvas / 7.7 card / 1.9 on the brand fill */
+
+    --positive: #34E084;            /* 9.55 on card */
+    --positive-foreground: #052E1A;
+    --negative: #F87171;            /* 6.14 on card */
+    --negative-foreground: #0B1120;
+    --warning: #FBBF24;             /* 9.77 on card */
+    --warning-foreground: #0B1120;
+
+    /* Identical to :root - the login panel is dark in both modes. */
+    --ink-panel: #0B1120;
+    --ink-panel-foreground: #F1F5F9;
+
+    /* Dark ramp is selected, not an inversion: own steps validated
+       against the dark card. */
+    --chart-1: #34E084;             /* 9.55 on card */
+    --chart-2: #94A3B8;             /* 6.72 on card */
+    --chart-3: #12D06A;             /* 7.71 on card */
+    --chart-4: #64748B;             /* 3.11 on card */
+    --chart-5: #334155;             /* below 3:1 - label or table required */
+    --chart-grid: #1E293B;
+    --chart-tick: #94A3B8;          /* 6.72 on card; 5.38 on the grid line */
+    --chart-band: #1B2436;
+    --chart-hairline: #64748B;
+
+    /* Shadows barely read on dark, so elevation is carried by a top
+       inset hairline instead. */
+    --elev-xs: 0 1px 2px 0 rgb(0 0 0 / 0.50);
+    --elev-sm: 0 1px 2px -1px rgb(0 0 0 / 0.60), inset 0 1px 0 0 rgb(255 255 255 / 0.03);
+    --elev-md: 0 4px 12px -4px rgb(0 0 0 / 0.70), inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+    --elev-lg: 0 10px 28px -10px rgb(0 0 0 / 0.75), inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+    --elev-overlay: 0 28px 70px -28px rgb(0 0 0 / 0.85), inset 0 1px 0 0 rgb(255 255 255 / 0.06);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+    * {
+        @apply border-border outline-ring;
     }
-  body {
-    @apply bg-background text-foreground;
+    html {
+        @apply font-sans;
+        -webkit-text-size-adjust: 100%;
     }
-  html {
-    @apply font-sans;
+    body {
+        @apply bg-background text-foreground text-base;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
+    /* Inter ships a "1" with no foot serif and an ambiguous "l"; cv05/cv08
+       swap in the disambiguated forms, and ss01 gives a single-storey "a"
+       only where it reads better. Cheap, and it is most of what makes
+       Inter look deliberately set rather than defaulted to. */
+    html {
+        font-feature-settings: "cv05" 1, "cv08" 1, "ss03" 1;
+    }
+    /* Figures align without switching typeface. This replaces font-mono on
+       numeric data - mono-for-data-labels is a recognisable AI tell, and
+       tabular-nums gets the alignment benefit from the text face itself. */
+    .tabular {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum" 1;
+    }
+    /* The focus ring is a colour, so give forced-colors mode a real
+       outline to latch onto. */
+    @media (forced-colors: active) {
+        *:focus-visible {
+            outline: 3px solid CanvasText;
+            outline-offset: 2px;
+        }
+    }
+    /* Honour the OS setting rather than animating regardless. tw-animate-css
+       and the chart library both animate by default. */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+@layer components {
+    /* ---------------------------------------------------------------
+       The AI surface. One recipe, used by AiInsightCard, the "Ask
+       RankyAI" affordances and the chat launcher, so the AI treatment
+       is recognisably one thing rather than per-page improvisation.
+       A whisper of brand over the card surface — not a gradient card.
+       --------------------------------------------------------------- */
+    .surface-ai {
+        background-image: linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--brand) 7%, var(--card)) 0%,
+            var(--card) 55%
+        );
+    }
+    /* Scrollable regions inside cards and the sidebar. Stock scrollbars
+       are the loudest chrome left in a light UI. */
+    .scroll-slim {
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-strong) transparent;
+    }
+    .scroll-slim::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .scroll-slim::-webkit-scrollbar-thumb {
+        background-color: var(--border-strong);
+        border: 2px solid transparent;
+        background-clip: content-box;
+        border-radius: 9999px;
+    }
+    .scroll-slim::-webkit-scrollbar-track {
+        background: transparent;
+    }
+}
+
+/* ---------------------------------------------------------------------
+   Leaflet. Stock leaflet.css ships its own light chrome - white popups
+   at 12px radius with a heavy shadow, and #f4f4f4 zoom buttons. Left
+   alone it is the most obvious "unstyled library" tell in the app.
+   --------------------------------------------------------------------- */
+.leaflet-container {
+    background: var(--muted);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    outline: none;
+    /* Leaflet's panes and controls sit at z-index 400-1000, which floats them
+       over dialogs, sheets and dropdowns. Isolating the container keeps those
+       values scoped to the map instead of the page. */
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background: var(--popover);
+    color: var(--popover-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--elev-lg);
+}
+.leaflet-popup-content {
+    margin: 0.625rem 0.75rem;
+    line-height: 1.45;
+}
+.leaflet-popup-close-button {
+    color: var(--muted-foreground) !important;
+    opacity: 1;
+}
+.leaflet-popup-close-button:hover {
+    color: var(--foreground) !important;
+}
+.leaflet-bar,
+.leaflet-bar a {
+    background: var(--card);
+    color: var(--foreground);
+    border-color: var(--border);
+    border-radius: var(--radius-md);
+}
+.leaflet-bar a:hover {
+    background: var(--accent);
+    color: var(--foreground);
+}
+.leaflet-control-attribution {
+    background: color-mix(in srgb, var(--card) 85%, transparent);
+    color: var(--muted-foreground);
+    font-size: 0.625rem;
+}
+.leaflet-control-attribution a {
+    color: var(--muted-foreground);
+    text-decoration: underline;
+}
+/* Stock Leaflet gives circle markers no visible focus at all. */
+.leaflet-interactive:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------
+   react-toastify structural bits its own variables don't cover.
+   --------------------------------------------------------------------- */
+.Toastify__toast {
+    border: 1px solid var(--border);
+    font-size: var(--text-sm);
+}
+.Toastify__close-button {
+    color: var(--muted-foreground);
+    opacity: 1;
+}
+.Toastify__close-button:hover {
+    color: var(--foreground);
 }

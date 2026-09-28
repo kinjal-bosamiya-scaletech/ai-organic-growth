@@ -1,27 +1,20 @@
-import { ArrowLeft } from "lucide-react";
-import { Link, useParams } from "react-router";
-
 interface ToolPageHeaderProps {
   title: string;
   description: string;
 }
 
-export function ToolPageHeader({ title, description }: ToolPageHeaderProps) {
-  const { projectId } = useParams<{ projectId: string }>();
-
+/**
+ * Page heading for a tool page.
+ *
+ * The "Back to Free Tools" link is gone: the Topbar now renders real
+ * breadcrumbs (Tools › Page Audit), so a second back-affordance on the page
+ * was duplicate navigation on all eight tool pages.
+ */
+export function ToolPageHeader({ title, description }: Readonly<ToolPageHeaderProps>) {
   return (
-    <div className="flex flex-col gap-2">
-      <Link
-        to={`/app/${projectId}/free-tools`}
-        className="flex w-fit items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-3.5" />
-        Back to Free Tools
-      </Link>
-      <div>
-        <h1 className="text-2xl font-bold">{title}</h1>
-        <p className="text-muted-foreground">{description}</p>
-      </div>
+    <div>
+      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+      <p className="mt-1 text-md text-muted-foreground">{description}</p>
     </div>
   );
 }

@@ -33,7 +33,7 @@ export function CopyButton({ text, label = "Copy", className }: CopyButtonProps)
       onClick={handleCopy}
       disabled={!text}
     >
-      {copied ? <Check className="text-primary" /> : <Copy />}
+      {copied ? <Check className="text-positive" /> : <Copy />}
       {copied ? "Copied" : label}
     </Button>
   );

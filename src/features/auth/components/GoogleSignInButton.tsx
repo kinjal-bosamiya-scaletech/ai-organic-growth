@@ -8,7 +8,7 @@ export function GoogleSignInButton({ onClick, label = "Continue with Google" }: 
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-white px-4 py-3.5 text-[15px] font-semibold text-[#3C4043] shadow-sm transition-shadow hover:shadow-md"
+      className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-white px-4 py-3.5 text-md font-semibold text-[#3C4043] shadow-sm transition-shadow hover:shadow-md"
     >
       <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
         <path

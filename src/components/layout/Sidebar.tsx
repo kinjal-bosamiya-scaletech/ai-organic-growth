@@ -1,7 +1,10 @@
-import { ChevronsUpDown, Sprout } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { Link, useLocation } from "react-router";
+import { Logo } from "@/components/common/Logo";
+import { ProjectAvatar } from "@/components/common/ProjectAvatar";
 import { SidebarNavItem } from "@/components/layout/SidebarNavItem";
 import { UserMenu } from "@/components/layout/UserMenu";
+import { useAuth } from "@/hooks/useAuth";
 import { NAV_ITEMS } from "@/lib/constants";
 import type { Project } from "@/types/project";
 
@@ -12,41 +15,38 @@ interface SidebarProps {
 export function Sidebar({ project }: SidebarProps) {
   const location = useLocation();
   const activeModuleId = location.pathname.split("/")[3];
+  const { user } = useAuth();
+  const isAdmin = user?.roleName === "Admin";
+  const navItems = NAV_ITEMS.filter((item) => item.id !== "settings" || isAdmin);
 
   return (
-    <aside className="flex h-full w-[246px] shrink-0 flex-col border-r border-border bg-card">
-      <div className="flex h-16 items-center gap-2.5 border-b border-border px-5">
-        <span className="flex size-[31px] items-center justify-center rounded-[9px] bg-primary text-primary-foreground">
-          <Sprout className="size-[17px]" />
-        </span>
-        <span className="text-[17px] font-extrabold tracking-tight">Organiq</span>
+    // 260px rather than 246px: IBM Plex Sans is wider than the previous face,
+    // and the project name and domain below both truncate.
+    <aside className="flex h-full w-65 shrink-0 flex-col border-r border-border bg-card">
+      <div className="flex h-14 items-center border-b border-border px-5">
+        <Logo iconSize={30} />
       </div>
 
-      <div className="p-3.5 pb-1">
+      <div className="p-3 pb-1">
         <Link
           to="/projects"
-          className="flex w-full items-center gap-2.5 rounded-[11px] border border-border bg-muted/40 px-2.5 py-2 text-left hover:bg-muted"
+          className="flex w-full items-center gap-2.5 rounded-md border border-border bg-muted px-2.5 py-2 text-left transition-colors outline-none hover:border-border-strong hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span
-            className="flex size-[30px] shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
-            style={{ backgroundColor: project.color }}
-          >
-            {project.letter}
-          </span>
+          <ProjectAvatar letter={project.letter} size="sm" />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[13.5px] font-bold">{project.name}</span>
-            <span className="block truncate text-[11.5px] text-muted-foreground">{project.domain}</span>
+            <span className="block truncate text-sm font-medium">{project.name}</span>
+            <span className="block truncate text-2xs text-muted-foreground">{project.domain}</span>
           </span>
-          <ChevronsUpDown className="size-[15px] shrink-0 text-muted-foreground" />
+          <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
         </Link>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3">
-        <div className="px-3 pt-2 pb-1.5 text-[10.5px] font-bold tracking-wider text-muted-foreground">
-          WORKSPACE
+        <div className="px-2 pt-2 pb-1.5 text-2xs font-medium tracking-[0.08em] text-muted-foreground uppercase">
+          Workspace
         </div>
         <div className="flex flex-col gap-1">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <SidebarNavItem
               key={item.id}
               item={item}

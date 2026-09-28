@@ -1,5 +1,6 @@
 import { GaugeChart } from "@/components/charts/GaugeChart";
-import { cn } from "@/lib/utils";
+import { SectionCard } from "@/components/common/SectionCard";
+import { SCORE_SCALES, STATUS_TEXT, scoreStatus } from "@/lib/score";
 
 interface HealthScoreCardProps {
   score: number;
@@ -7,71 +8,46 @@ interface HealthScoreCardProps {
   openIssues: number;
   quickWins: number;
   domainAuthority: number | null;
-  variant?: "light" | "dark";
 }
 
-function healthLabel(score: number): string {
-  if (score >= 80) return "GOOD";
-  if (score >= 60) return "FAIR";
-  return "NEEDS WORK";
-}
-
+/**
+ * The `variant="light" | "dark"` prop was removed: DashboardPage never passed
+ * it, so the entire dark branch was dead code — and it carried a hardcoded
+ * gradient plus four arbitrary hex values that were hand-simulating dark mode.
+ * Real dark mode now handles that through tokens.
+ */
 export function HealthScoreCard({
   score,
   indexed,
   openIssues,
   quickWins,
   domainAuthority,
-  variant = "light",
-}: HealthScoreCardProps) {
-  const dark = variant === "dark";
-  const label = healthLabel(score);
+}: Readonly<HealthScoreCardProps>) {
+  const rows: { label: string; value: string; tone?: string }[] = [
+    { label: "Indexed pages", value: indexed },
+    { label: "Open issues", value: String(openIssues), tone: openIssues > 0 ? STATUS_TEXT.bad : undefined },
+    { label: "Quick wins", value: String(quickWins), tone: quickWins > 0 ? STATUS_TEXT.good : undefined },
+    { label: "Domain authority", value: domainAuthority === null ? "—" : String(domainAuthority) },
+  ];
 
   return (
-    <div
-      className={cn(
-        "flex flex-col rounded-2xl border p-5",
-        dark
-          ? "items-center justify-center border-transparent bg-[linear-gradient(160deg,#17181D,#23252D)] text-white"
-          : "border-border bg-card",
-      )}
-    >
-      <div className={cn("mb-1 text-sm font-bold", dark ? "self-start text-[#AEB4BE]" : "text-foreground")}>
-        SEO Health Score
+    <SectionCard title="SEO health score">
+      <div className="flex justify-center">
+        <GaugeChart score={score} scale={SCORE_SCALES.health} />
       </div>
-      <div className="my-1.5 self-center">
-        <GaugeChart score={score} label={label} color={dark ? "#F0A93B" : "#E0900B"} dark={dark} />
-      </div>
-      {dark ? (
-        <>
-          <p className="text-center text-[13px] leading-relaxed text-[#AEB4BE]">
-            Fixing the 3 high-priority issues could raise this to <b className="text-[#12D06A]">~86</b>.
-          </p>
-          <div className="mt-2 flex justify-between text-[13px]">
-            <span className="text-[#AEB4BE]">Domain authority</span>
-            <span className="font-bold text-white">{domainAuthority ?? "—"}</span>
+      <dl className="mt-4 flex flex-col gap-2 border-t border-border pt-3.5">
+        {rows.map((row) => (
+          <div key={row.label} className="flex items-baseline justify-between gap-3 text-sm">
+            <dt className="text-muted-foreground">{row.label}</dt>
+            <dd className={`tabular font-medium ${row.tone ?? "text-foreground"}`}>{row.value}</dd>
           </div>
-        </>
-      ) : (
-        <div className="mt-1.5 flex flex-col gap-2">
-          <div className="flex justify-between text-[13px]">
-            <span className="text-muted-foreground">Indexed pages</span>
-            <span className="font-bold">{indexed}</span>
-          </div>
-          <div className="flex justify-between text-[13px]">
-            <span className="text-muted-foreground">Open issues</span>
-            <span className="font-bold text-destructive">{openIssues}</span>
-          </div>
-          <div className="flex justify-between text-[13px]">
-            <span className="text-muted-foreground">Quick wins</span>
-            <span className="font-bold text-primary">{quickWins}</span>
-          </div>
-          <div className="flex justify-between text-[13px]">
-            <span className="text-muted-foreground">Domain authority</span>
-            <span className="font-bold">{domainAuthority ?? "—"}</span>
-          </div>
-        </div>
-      )}
-    </div>
+        ))}
+      </dl>
+    </SectionCard>
   );
+}
+
+/** Re-exported so callers can label a score consistently with the gauge. */
+export function healthStatus(score: number) {
+  return scoreStatus(score, SCORE_SCALES.health);
 }

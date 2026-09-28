@@ -2,8 +2,7 @@ import DOMPurify from "dompurify";
 import { FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { GeneratedContent } from "@/types/contentGeneration";
-
-const ALLOWED_TAGS = ["h2", "h3", "p", "strong", "em", "ul", "ol", "li", "a"];
+import { ARTICLE_ALLOWED_ATTR, ARTICLE_ALLOWED_TAGS } from "@/features/content-generation/articleHtmlSanitizer";
 
 function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -11,7 +10,10 @@ function escapeHtml(value: string): string {
 
 /** Builds a .doc file (Word's HTML-import format) so the whole generated package opens directly in Word/Google Docs. */
 function buildDocument(content: GeneratedContent): string {
-  const safeArticleHtml = DOMPurify.sanitize(content.contentHtml, { ALLOWED_TAGS, ALLOWED_ATTR: ["href"] });
+  const safeArticleHtml = DOMPurify.sanitize(content.contentHtml, {
+    ALLOWED_TAGS: ARTICLE_ALLOWED_TAGS,
+    ALLOWED_ATTR: ARTICLE_ALLOWED_ATTR,
+  });
 
   const faqsHtml = content.faqs.length
     ? `<h2>FAQs</h2>${content.faqs

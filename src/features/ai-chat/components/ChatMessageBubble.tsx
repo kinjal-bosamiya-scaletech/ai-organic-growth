@@ -1,12 +1,26 @@
 import { Bot, Check } from "lucide-react";
+import { useEffect } from "react";
 import { Markdown } from "@/components/common/Markdown";
 import { useTypewriter } from "@/features/ai-chat/hooks/useTypewriter";
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/types/chat";
 
-const ChatMessageBubble = ({ message }: { message: ChatMessage }) => {
+interface ChatMessageBubbleProps {
+  message: ChatMessage;
+  /** False shows the reply in full straight away — how history should read. */
+  animate?: boolean;
+  /** Fired once the reveal finishes, so the caller can stop replaying it. */
+  onTyped?: (id: string) => void;
+}
+
+const ChatMessageBubble = ({ message, animate = true, onTyped }: ChatMessageBubbleProps) => {
   const isAi = message.role === "ai";
-  const { displayedText, isTyping } = useTypewriter(message.text, isAi);
+  const shouldType = isAi && animate;
+  const { displayedText, isTyping } = useTypewriter(message.text, shouldType);
+
+  useEffect(() => {
+    if (shouldType && !isTyping) onTyped?.(message.id);
+  }, [shouldType, isTyping, message.id, onTyped]);
 
   return (
     <div className={cn("flex items-start gap-2.5", isAi ? "" : "flex-row-reverse")}>
@@ -30,8 +44,8 @@ const ChatMessageBubble = ({ message }: { message: ChatMessage }) => {
           <div className="mt-3 flex flex-col gap-2 border-t border-black/10 pt-3">
             {message.actions.map((action) => (
               <div key={action} className="flex items-start gap-2">
-                <Check className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2.4} />
-                <span className="text-[13px] leading-relaxed">{action}</span>
+                <Check className="mt-0.5 size-4 shrink-0 text-positive" strokeWidth={2.4} />
+                <span className="text-sm leading-relaxed">{action}</span>
               </div>
             ))}
           </div>

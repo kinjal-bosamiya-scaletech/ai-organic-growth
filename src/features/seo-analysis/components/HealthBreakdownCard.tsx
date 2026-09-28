@@ -8,11 +8,11 @@ export function HealthBreakdownCard({ items }: { items: SeoBreakdownItem[] }) {
       <div className="flex flex-col gap-4">
         {items.map((item) => (
           <div key={item.label}>
-            <div className="mb-1.5 flex justify-between text-[13.5px]">
+            <div className="mb-1.5 flex justify-between text-sm">
               <span className="font-semibold">{item.label}</span>
-              <span className="font-bold">{item.score}/100</span>
+              <span className="font-semibold">{item.score}/100</span>
             </div>
-            <Progress value={item.score} className="h-2" />
+            <Progress value={item.score} />
           </div>
         ))}
       </div>

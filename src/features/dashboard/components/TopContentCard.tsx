@@ -51,7 +51,7 @@ export function TopContentCard({ projectId, keywords, pages }: TopContentCardPro
             Top pages
           </button>
         </div>
-        <span className="text-[12.5px] text-muted-foreground">{count} tracked · last 28 days</span>
+        <span className="text-xs text-muted-foreground">{count} tracked · last 28 days</span>
       </div>
       {tab === "keywords" ? (
         <TopKeywordsTable keywords={keywords} />

@@ -1,19 +1,26 @@
 /**
  * Token/session storage helpers, mirroring the shape of the `mmscan` frontend's
  * `Auth.service.ts` (checkLogin/getAccessToken/setAuthData/getAuthData/removeAuthData).
- * There's no real OAuth token yet — sign-in is mocked — so this stores a plain
- * session record rather than an encrypted JWT; swap in real tokens here once
- * the backend issues them, without touching call sites.
  */
+import httpService from "@/services/http.service";
 
 const AUTH_STORAGE_KEY = "organiq.auth";
 
+export interface AuthUser {
+  id: string;
+  fullName: string;
+  email: string;
+  roleId: string;
+  roleName: string;
+}
+
 export interface AuthData {
   accessToken: string;
-  user: {
-    name: string;
-    email: string;
-  };
+  user: AuthUser;
+}
+
+export function login(email: string, password: string): Promise<AuthData> {
+  return httpService.post<AuthData>("/auth/login", { email, password }, { isPublic: true });
 }
 
 export function checkLogin(): boolean {

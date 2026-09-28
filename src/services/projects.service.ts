@@ -2,6 +2,7 @@ import { API_CONFIG } from "@/lib/api-endpoints";
 import { USE_MOCKS, mockDelay } from "@/lib/mockDelay";
 import { projectsMock } from "@/mocks/data/projects.mock";
 import httpService from "@/services/http.service";
+import { getAccessToken } from "@/services/auth.service";
 import type { Project } from "@/types/project";
 
 // Future backend contract:
@@ -12,6 +13,7 @@ import type { Project } from "@/types/project";
 const inMemoryProjects: Project[] = projectsMock.map((project) => ({ ...project }));
 
 export async function getProjects(): Promise<Project[]> {
+  console.log("🚀 ~ getProjects ~ USE_MOCKS:", USE_MOCKS, import.meta.env.VITE_USE_MOCKS)
   if (USE_MOCKS) return mockDelay([...inMemoryProjects]);
   return httpService.get<Project[]>(API_CONFIG.projects);
 }
@@ -33,7 +35,13 @@ export async function connectProject(projectId: string): Promise<Project> {
   return httpService.post<Project>(API_CONFIG.projectConnect(projectId));
 }
 
-/** Absolute URL to the backend's Google OAuth consent redirect, for opening in a popup. */
+/**
+ * Absolute URL to the backend's Google OAuth consent redirect, for opening in
+ * a popup. That's a plain browser navigation — it can't carry an
+ * Authorization header — so the access token rides along as a query param.
+ */
 export function getGoogleConnectUrl(): string {
-  return `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
+  const token = getAccessToken();
+  const params = token ? `?token=${encodeURIComponent(token)}` : "";
+  return `${import.meta.env.VITE_API_BASE_URL}/auth/google${params}`;
 }

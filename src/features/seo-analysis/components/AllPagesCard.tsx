@@ -16,11 +16,17 @@ function RankCell({ page }: { page: PageStatus }) {
     return <span className="text-muted-foreground/60">—</span>;
   }
   return (
-    <span className="inline-flex items-center gap-1 font-mono">
+    <span className="tabular inline-flex items-center gap-1">
       #{page.rank}
       {page.rankDelta !== null && page.rankDelta !== 0 ? (
-        <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${page.rankDelta > 0 ? "text-primary" : "text-destructive"}`}>
-          {page.rankDelta > 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+        <span
+          className={`inline-flex items-center gap-0.5 text-xs font-medium ${page.rankDelta > 0 ? "text-positive" : "text-negative"}`}
+        >
+          {page.rankDelta > 0 ? (
+            <TrendingUp className="size-3" aria-hidden="true" />
+          ) : (
+            <TrendingDown className="size-3" aria-hidden="true" />
+          )}
           {Math.abs(page.rankDelta)}
         </span>
       ) : null}
@@ -113,9 +119,9 @@ export function AllPagesCard({ projectId }: { projectId: string }) {
         ) : (
           <>
             <div className="max-h-[420px] overflow-y-auto overflow-x-auto">
-            <table className="w-full text-[13px]">
+            <table className="w-full text-sm">
               <thead className="sticky top-0 bg-card">
-                <tr className="border-b border-border text-left text-[11.5px] font-bold text-muted-foreground">
+                <tr className="border-b border-border text-left text-2xs font-semibold text-muted-foreground">
                   <th className="pb-2 pr-3">Page</th>
                   <th className="pb-2 pr-3">Status</th>
                   <th className="pb-2 pr-3">Rank</th>
@@ -130,7 +136,7 @@ export function AllPagesCard({ projectId }: { projectId: string }) {
                     </td>
                     <td className="py-2 pr-3">
                       {page.indexed ? (
-                        <span className="inline-flex items-center gap-1 text-primary">
+                        <span className="inline-flex items-center gap-1 text-positive">
                           <CheckCircle2 className="size-3.5" />
                           Indexed
                         </span>
@@ -161,7 +167,7 @@ export function AllPagesCard({ projectId }: { projectId: string }) {
       <Dialog open={activeUrl !== null} onOpenChange={(open) => !open && setActiveUrl(null)}>
         <DialogContent className="max-w-[720px] sm:max-w-[720px]">
           <DialogHeader>
-            <DialogTitle className="truncate text-[15px]">{activeUrl}</DialogTitle>
+            <DialogTitle className="truncate text-md">{activeUrl}</DialogTitle>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto pr-1">
             {analysisMutation.isPending ? (

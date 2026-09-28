@@ -7,7 +7,6 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "content-generation", label: "Content Generator", icon: FileText },
   { id: "seo-analysis", label: "SEO Analysis", icon: Search },
   { id: "free-tools", label: "Tools", icon: Wrench },
-  // { id: "settings", label: "Settings", icon: Settings },
 ];
 
 export const MODULE_TITLES: Record<NavItem["id"], string> = {

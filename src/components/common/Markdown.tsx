@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 
 const PROSE_CLASSNAME =
   "[&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold " +
-  "[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 " +
-  "[&_code]:rounded [&_code]:bg-black/10 [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[12.5px] " +
-  "[&_h2]:mb-1 [&_h2]:text-[15px] [&_h2]:font-bold [&_h3]:mb-1 [&_h3]:text-sm [&_h3]:font-bold " +
+  "[&_a]:text-foreground [&_a]:underline [&_a]:decoration-border [&_a]:underline-offset-[3px] hover:[&_a]:decoration-foreground " +
+  "[&_code]:rounded [&_code]:bg-black/10 [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs " +
+  "[&_h2]:mb-1 [&_h2]:text-md [&_h2]:font-semibold [&_h3]:mb-1 [&_h3]:text-sm [&_h3]:font-semibold " +
   "[&_ul]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:mb-2 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-0.5";
 
 // Appended to the in-progress text when `showCursor` is set, then swapped for

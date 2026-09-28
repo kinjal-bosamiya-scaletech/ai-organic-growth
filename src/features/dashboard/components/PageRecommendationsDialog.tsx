@@ -1,13 +1,8 @@
 import { Code2, FileText, Loader2, Search, Sparkles, Users, Zap } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SEVERITY_CHIP } from "@/lib/severity";
 import { cn } from "@/lib/utils";
 import type { Recommendation } from "@/types/recommendation";
-
-const PRIORITY_PILL: Record<Recommendation["priority"], string> = {
-  High: "bg-destructive/10 text-destructive",
-  Medium: "bg-brand-medium/10 text-brand-medium",
-  Low: "bg-brand-low/10 text-brand-low",
-};
 
 const CATEGORY_ICON: Record<string, typeof Search> = {
   SEO: Search,
@@ -39,9 +34,9 @@ export function PageRecommendationsDialog({
       <DialogContent className="max-w-[960px] sm:max-w-[960px]">
         <DialogHeader>
           <DialogTitle className="flex flex-wrap items-center gap-2">
-            <Sparkles className="size-4 text-brand-indigo" />
+            <Sparkles className="size-4 text-muted-foreground" />
             AI recommendations
-            {pageUrl ? <span className="truncate font-mono text-[13px] font-normal text-muted-foreground">{pageUrl}</span> : null}
+            {pageUrl ? <span className="truncate font-mono text-sm font-normal text-muted-foreground">{pageUrl}</span> : null}
           </DialogTitle>
         </DialogHeader>
 
@@ -57,11 +52,11 @@ export function PageRecommendationsDialog({
         ) : (
           <>
             <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3.5">
-              <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground">
+              <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
                 {recommendations?.length ?? 0} recommendations
               </span>
               {highPriorityCount > 0 ? (
-                <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-bold text-destructive">
+                <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-semibold text-destructive">
                   {highPriorityCount} high priority
                 </span>
               ) : null}
@@ -73,34 +68,34 @@ export function PageRecommendationsDialog({
                 return (
                   <div key={reco.id} className="flex flex-col rounded-xl border border-border p-4">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
-                      <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-brand-indigo/10 text-brand-indigo">
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary text-foreground">
                         <Icon className="size-3.5" />
                       </span>
-                      <span className="text-[11.5px] font-bold tracking-wide text-muted-foreground uppercase">
+                      <span className="text-2xs font-semibold tracking-wide text-muted-foreground uppercase">
                         {reco.category}
                       </span>
-                      <span className={cn("ml-auto rounded-full px-2.5 py-0.5 text-[11px] font-bold", PRIORITY_PILL[reco.priority])}>
+                      <span className={cn("ml-auto rounded-full px-2.5 py-0.5 text-2xs font-semibold", SEVERITY_CHIP[reco.priority])}>
                         {reco.priority}
                       </span>
                     </div>
 
-                    <div className="text-[14.5px] leading-snug font-bold">{reco.title}</div>
-                    <div className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{reco.description}</div>
+                    <div className="text-base leading-snug font-semibold">{reco.title}</div>
+                    <div className="mt-1 text-sm leading-relaxed text-muted-foreground">{reco.description}</div>
 
                     <div className="mt-2.5 flex gap-2">
-                      <span className="rounded-[8px] bg-muted/60 px-2.5 py-1 text-[11.5px] font-semibold text-primary">
+                      <span className="rounded-md bg-muted px-2.5 py-1 text-2xs font-medium text-foreground">
                         {reco.impact}
                       </span>
-                      <span className="rounded-[8px] bg-muted/60 px-2.5 py-1 text-[11.5px] font-semibold text-muted-foreground">
+                      <span className="rounded-[8px] bg-muted/60 px-2.5 py-1 text-2xs font-semibold text-muted-foreground">
                         {reco.effort} effort
                       </span>
                     </div>
 
                     <div className="mt-3 border-t border-border pt-3">
-                      <div className="mb-1.5 text-[11px] font-bold tracking-wide text-muted-foreground">ACTION STEPS</div>
+                      <div className="mb-1.5 text-2xs font-semibold tracking-wide text-muted-foreground">ACTION STEPS</div>
                       <ul className="flex flex-col gap-1.5">
                         {reco.steps.map((step) => (
-                          <li key={step} className="flex gap-2 text-[13px] leading-relaxed">
+                          <li key={step} className="flex gap-2 text-sm leading-relaxed">
                             <span className="mt-1.5 size-1 shrink-0 rounded-full bg-foreground/60" />
                             {step}
                           </li>

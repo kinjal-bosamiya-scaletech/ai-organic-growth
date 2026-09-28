@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { AlertCircle, ArrowLeft, ChevronDown, ChevronUp, Loader2, Search } from "lucide-react";
-import { Link } from "react-router";
+import { useMemo, useState } from "react";
+import { ChevronDown, ChevronUp, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { AutocompleteInput } from "@/components/ui/autocomplete-input";
+import { Callout } from "@/components/common/Callout";
 import { SectionCard } from "@/components/common/SectionCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useActiveProject } from "@/hooks/useActiveProject";
 import { useCompetitorAudit, usePageAudit } from "@/hooks/queries/usePageAudit";
+import { usePagesStatus } from "@/hooks/queries/usePagesStatus";
 import { OverviewTab } from "@/features/free-tools/components/PageAudit/OverviewTab";
 import { ContentTab } from "@/features/free-tools/components/PageAudit/ContentTab";
 import { MetadataTab } from "@/features/free-tools/components/PageAudit/MetadataTab";
@@ -21,6 +22,8 @@ export function PageAuditPage() {
   const auditMutation = usePageAudit(project);
   const competitorAudit = useCompetitorAudit(project);
   const result = auditMutation.data;
+  const { data: pages, isLoading: isPagesLoading } = usePagesStatus(project.id);
+  const pageSuggestions = useMemo(() => pages?.map((p) => p.url) ?? [], [pages]);
 
   const canSubmit = pageUrl.trim().length > 0;
   const wasBlocked = result?.htmlFetchBlocked ?? false;
@@ -32,23 +35,18 @@ export function PageAuditPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link
-        to={`/app/${project.id}/free-tools`}
-        className="flex w-fit items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to Tools
-      </Link>
 
       <SectionCard title="Analyze your Web Page">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex flex-1 flex-col gap-1">
-            <label className="text-[13px] font-semibold text-foreground">Page Url</label>
-            <Input
+            <label className="text-sm font-semibold text-foreground">Page Url</label>
+            <AutocompleteInput
               value={pageUrl}
-              onChange={(e) => setPageUrl(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
-              placeholder={`https://${project.domain}/your-page/`}
+              onChange={setPageUrl}
+              onSubmit={handleAnalyze}
+              suggestions={pageSuggestions}
+              isLoading={isPagesLoading}
+              placeholder={`https://${project.domain}/your-page/ or search your saved pages`}
               className="h-9"
             />
           </div>
@@ -77,7 +75,7 @@ export function PageAuditPage() {
         ) : null}
 
         {wasBlocked && !showManualHtml ? (
-          <p className="mt-3 text-[13px] leading-relaxed text-destructive">
+          <p className="mt-3 text-sm leading-relaxed text-destructive">
             We couldn't read your page's live HTML (likely bot protection blocking our request). Use "Paste page
             HTML manually" above and re-analyze for a real, exact audit.
           </p>
@@ -89,42 +87,33 @@ export function PageAuditPage() {
       ) : null}
 
       {result && result.status !== "ok" ? (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <AlertCircle className="mt-0.5 size-5 shrink-0 text-amber-600" />
-          <div className="flex flex-col gap-1">
-            <p className="font-semibold text-amber-900">Search Console connection required</p>
-            <p className="text-sm text-amber-800">
-              {result.status === "not_connected"
-                ? "This project isn't connected to Google Search Console yet. Connect it in Settings, then try again."
-                : result.reason}
-            </p>
-          </div>
-        </div>
+        <Callout tone="warning" title="Search Console connection required">
+          {result.status === "not_connected"
+            ? "This project isn't connected to Google Search Console yet. Connect it in Settings, then try again."
+            : result.reason}
+        </Callout>
       ) : null}
 
       {result && result.status === "ok" ? (
         <div className="flex flex-col gap-4">
           {result.isSampleData || result.metadataOnly ? (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
-              <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-600" />
-              <p className="text-[12.5px] text-amber-900">
-                {result.reason ??
-                  "Sample data — this tool isn't connected to a live crawler yet, so these numbers are illustrative, not a real analysis of the page you entered."}
-              </p>
-            </div>
+            <Callout>
+              {result.reason ??
+                "Sample data — this tool isn't connected to a live crawler yet, so these numbers are illustrative, not a real analysis of the page you entered."}
+            </Callout>
           ) : null}
 
           {result.gscInsights ? (
             <SectionCard title="What Search Console reports for this page">
               <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between text-[13px]">
+                <div className="flex items-center justify-between text-sm">
                   <span className="text-foreground">Indexing status</span>
                   <span className="font-semibold text-foreground">
                     {result.gscInsights.indexed ? "Indexed" : "Not indexed"} — {result.gscInsights.coverageState}
                   </span>
                 </div>
                 {result.gscInsights.lastCrawlTime ? (
-                  <div className="flex items-center justify-between text-[13px]">
+                  <div className="flex items-center justify-between text-sm">
                     <span className="text-foreground">Last crawled by Google</span>
                     <span className="font-semibold text-foreground">
                       {new Date(result.gscInsights.lastCrawlTime).toLocaleString()}
@@ -135,21 +124,21 @@ export function PageAuditPage() {
                 {result.gscInsights.performance ? (
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <div className="rounded-lg border border-border p-3">
-                      <p className="text-[11px] text-muted-foreground">Clicks (28d)</p>
+                      <p className="text-2xs text-muted-foreground">Clicks (28d)</p>
                       <p className="text-lg font-semibold text-foreground">{result.gscInsights.performance.clicks}</p>
                     </div>
                     <div className="rounded-lg border border-border p-3">
-                      <p className="text-[11px] text-muted-foreground">Impressions (28d)</p>
+                      <p className="text-2xs text-muted-foreground">Impressions (28d)</p>
                       <p className="text-lg font-semibold text-foreground">
                         {result.gscInsights.performance.impressions}
                       </p>
                     </div>
                     <div className="rounded-lg border border-border p-3">
-                      <p className="text-[11px] text-muted-foreground">CTR</p>
+                      <p className="text-2xs text-muted-foreground">CTR</p>
                       <p className="text-lg font-semibold text-foreground">{result.gscInsights.performance.ctr}</p>
                     </div>
                     <div className="rounded-lg border border-border p-3">
-                      <p className="text-[11px] text-muted-foreground">Avg. Position</p>
+                      <p className="text-2xs text-muted-foreground">Avg. Position</p>
                       <p className="text-lg font-semibold text-foreground">
                         {result.gscInsights.performance.position}
                       </p>
@@ -159,10 +148,10 @@ export function PageAuditPage() {
 
                 {result.gscInsights.topQueries.length > 0 ? (
                   <div>
-                    <p className="mb-2 text-[13px] font-semibold text-foreground">Top queries (last 28 days)</p>
+                    <p className="mb-2 text-sm font-semibold text-foreground">Top queries (last 28 days)</p>
                     <div className="flex flex-col gap-1">
                       {result.gscInsights.topQueries.map((q) => (
-                        <div key={q.query} className="flex items-center justify-between text-[13px]">
+                        <div key={q.query} className="flex items-center justify-between text-sm">
                           <span className="text-foreground">{q.query}</span>
                           <span className="text-muted-foreground">
                             pos. {q.position} · {q.clicks} clicks · {q.ctr} CTR

@@ -19,7 +19,7 @@ export function ToolCard({ name, icon, comingSoon, to }: ToolCardProps) {
         <p className="text-center text-sm font-medium text-foreground">{name}</p>
       </div>
       {isLive && (
-        <span className="absolute top-2 right-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wide text-primary-foreground">
+        <span className="absolute top-2 right-2 rounded-full bg-primary px-2 py-0.5 text-2xs font-semibold tracking-wide text-primary-foreground">
           Live
         </span>
       )}

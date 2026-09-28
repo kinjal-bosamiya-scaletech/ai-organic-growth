@@ -1,5 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CHANGE_ICON, CHANGE_TEXT, changeTone } from "@/lib/score";
 import { cn } from "@/lib/utils";
 import type { PageMetric } from "@/types/page";
 
@@ -13,29 +14,31 @@ interface TopPagesTableProps {
 export function TopPagesTable({ pages, onRecommend }: TopPagesTableProps) {
   return (
     <>
-      <div className={cn("grid items-center gap-2 bg-muted/40 px-5.5 py-2.5 text-[11.5px] font-bold tracking-wide text-muted-foreground", COLUMNS)}>
-        <div>PAGE</div>
-        <div className="text-right">CLICKS</div>
-        <div className="text-right">IMPR.</div>
+      <div className={cn("grid items-center gap-2 bg-muted px-5 py-2.5 text-2xs font-medium tracking-[0.08em] text-muted-foreground uppercase", COLUMNS)}>
+        <div>Page</div>
+        <div className="text-right">Clicks</div>
+        <div className="text-right">Impr.</div>
         <div className="text-right">CTR</div>
-        <div className="text-right">POSITION</div>
-        <div className="text-right">CHANGE</div>
+        <div className="text-right">Position</div>
+        <div className="text-right">Change</div>
         <div />
       </div>
       {pages.map((page) => {
-        const isPositive = page.delta.startsWith("+");
+        const tone = changeTone(page.delta);
+        const ChangeIcon = CHANGE_ICON[tone];
         return (
           <div
             key={page.page}
-            className={cn("grid items-center gap-2 border-t border-border/70 px-5.5 py-3.5 text-[13.5px]", COLUMNS)}
+            className={cn("grid items-center gap-2 border-t border-border px-5 py-3 text-sm", COLUMNS)}
           >
-            <div className="truncate font-semibold">{page.page}</div>
-            <div className="text-right font-mono">{page.clicks}</div>
-            <div className="text-right font-mono text-muted-foreground">{page.impressions}</div>
-            <div className="text-right font-mono text-muted-foreground">{page.ctr}</div>
-            <div className="text-right font-mono font-bold">{page.position}</div>
+            <div className="truncate font-medium">{page.page}</div>
+            <div className="tabular text-right font-medium">{page.clicks}</div>
+            <div className="tabular text-right text-muted-foreground">{page.impressions}</div>
+            <div className="tabular text-right text-muted-foreground">{page.ctr}</div>
+            <div className="tabular text-right font-medium">{page.position}</div>
             <div className="text-right">
-              <span className={cn("font-mono", isPositive ? "text-primary" : "text-destructive")}>
+              <span className={cn("tabular inline-flex items-center justify-end gap-1 font-medium", CHANGE_TEXT[tone])}>
+                <ChangeIcon className="size-3" aria-hidden="true" />
                 {page.delta}
               </span>
             </div>

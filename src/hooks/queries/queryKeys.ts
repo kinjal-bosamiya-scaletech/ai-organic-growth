@@ -12,4 +12,9 @@ export const queryKeys = {
   dashboardGeo: (projectId: string) => ["projects", projectId, "geo"] as const,
   gscSnapshot: (projectId: string) => ["projects", projectId, "gsc-snapshot"] as const,
   contentGeneration: (projectId: string) => ["projects", projectId, "content-generation"] as const,
+  users: () => ["users"] as const,
+  roles: () => ["roles"] as const,
+  activitySummary: () => ["activity", "summary"] as const,
+  activityLogs: (params: object) => ["activity", "logs", params] as const,
+  activityErrors: () => ["activity", "errors"] as const,
 };

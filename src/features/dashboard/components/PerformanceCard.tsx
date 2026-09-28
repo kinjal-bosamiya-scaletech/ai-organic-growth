@@ -1,4 +1,4 @@
-import { TrendAreaChart } from "@/components/charts/TrendAreaChart";
+import { StackedTrendChart } from "@/components/charts/StackedTrendChart";
 import { SectionCard } from "@/components/common/SectionCard";
 import type { DashboardTrend } from "@/types/dashboard";
 
@@ -7,28 +7,22 @@ interface PerformanceCardProps {
   trend: DashboardTrend;
 }
 
-export function PerformanceCard({ title, trend }: PerformanceCardProps) {
+export function PerformanceCard({ title, trend }: Readonly<PerformanceCardProps>) {
   return (
-    <SectionCard
-      title={title}
-      action={
-        <div className="flex gap-4 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-primary" />
-            Clicks
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-brand-indigo" />
-            Impressions
-          </span>
-        </div>
-      }
-    >
-      <TrendAreaChart
+    <SectionCard title={title} description="Last 28 days">
+      {/* Clicks and impressions were previously drawn on two independent
+          y-axes, which meant their crossings and gaps were artefacts of axis
+          choice rather than real relationships. Two panels give each metric an
+          honest zero-based scale and its own vertical space.
+
+          The hand-rolled swatch legend is gone: each panel is titled with its
+          own metric name and current value, which also removes the drift risk
+          between the legend's tokens and the chart's colours. */}
+      <StackedTrendChart
         labels={trend.labels}
-        series={[
-          { label: "Clicks", data: trend.clicksSeries, color: "#12A150" },
-          { label: "Impressions", data: trend.impressionsSeries, color: "#5B5BD6" },
+        panels={[
+          { label: "Clicks", data: trend.clicksSeries },
+          { label: "Impressions", data: trend.impressionsSeries },
         ]}
       />
     </SectionCard>

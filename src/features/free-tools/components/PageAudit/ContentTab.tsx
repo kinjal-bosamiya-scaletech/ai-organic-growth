@@ -1,25 +1,15 @@
 import { useState } from "react";
+import { MeterBar } from "@/components/charts/MeterBar";
 import { SectionCard } from "@/components/common/SectionCard";
 import { Button } from "@/components/ui/button";
+import { SCORE_SCALES } from "@/lib/score";
 import type { PageAuditResult } from "@/types/pageAudit";
 
-function MetricBar({ label, value }: { label: string; value: number }) {
-  const color = value >= 70 ? "bg-emerald-500" : value >= 40 ? "bg-orange-500" : "bg-red-500";
+function StatRow({ label, value }: Readonly<{ label: string; value: string | number }>) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="w-32 shrink-0 text-[13px] text-foreground">{label}</span>
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
-      </div>
-    </div>
-  );
-}
-
-function StatRow({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="flex items-center justify-between text-[13px]">
-      <span className="text-muted-foreground">{label}:</span>
-      <span className="font-semibold text-foreground">{value}</span>
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="tabular font-medium text-foreground">{value}</span>
     </div>
   );
 }
@@ -32,51 +22,55 @@ export function ContentTab({ result }: { result: PageAuditResult }) {
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <SectionCard title="Readability">
-        <p className="-mt-2 mb-3 text-[13px] text-foreground">
-          Flesch Reading Score: <span className="font-bold text-orange-600">{readability.fleschScore}%</span>
-        </p>
-        <p className="-mt-2 mb-3 text-[12.5px] text-muted-foreground">
-          Your flesch reading score of {readability.fleschScore} is considered {readability.fleschLabel}.
-        </p>
+      <SectionCard
+        title="Readability"
+        description={`Flesch reading score of ${readability.fleschScore} is considered ${readability.fleschLabel}.`}
+      >
+        <div className="mb-4 flex items-baseline gap-2 border-b border-border pb-3">
+          <span className="tabular text-2xl font-semibold text-foreground">{readability.fleschScore}%</span>
+          <span className="text-xs text-muted-foreground">Flesch reading score</span>
+        </div>
+        {/* SCORE_SCALES.readability keeps the original 70/40 breakpoints: these
+            are content sub-metrics that sit lower by nature, and forcing them
+            onto the 90/50 audit scale would turn nearly every bar red. */}
         <div className="flex flex-col gap-2">
-          <MetricBar label="Passive Voice" value={readability.passiveVoice} />
-          <MetricBar label="Sentence Length" value={readability.sentenceLength} />
-          <MetricBar label="Paragraph Length" value={readability.paragraphLength} />
-          <MetricBar label="Word Complexity" value={readability.wordComplexity} />
-          <MetricBar label="Transition Words" value={readability.transitionWords} />
+          <MeterBar label="Passive voice" value={readability.passiveVoice} scale={SCORE_SCALES.readability} suffix="%" />
+          <MeterBar label="Sentence length" value={readability.sentenceLength} scale={SCORE_SCALES.readability} suffix="%" />
+          <MeterBar label="Paragraph length" value={readability.paragraphLength} scale={SCORE_SCALES.readability} suffix="%" />
+          <MeterBar label="Word complexity" value={readability.wordComplexity} scale={SCORE_SCALES.readability} suffix="%" />
+          <MeterBar label="Transition words" value={readability.transitionWords} scale={SCORE_SCALES.readability} suffix="%" />
         </div>
       </SectionCard>
 
       <SectionCard title="Stats">
         <div className="flex flex-col gap-1.5">
-          <StatRow label="Word Count" value={stats.wordCount} />
-          <StatRow label="Keyword Occurrences" value={stats.keywordOccurrences} />
-          <StatRow label="Keyword Density" value={`${stats.keywordDensity.toFixed(1)}%`} />
+          <StatRow label="Word count" value={stats.wordCount} />
+          <StatRow label="Keyword occurrences" value={stats.keywordOccurrences} />
+          <StatRow label="Keyword density" value={`${stats.keywordDensity.toFixed(1)}%`} />
           <StatRow label="Images" value={stats.images} />
-          <StatRow label="Images With Alt Text" value={stats.imagesWithAltText} />
+          <StatRow label="Images with alt text" value={stats.imagesWithAltText} />
           <StatRow label="Links" value={stats.links} />
           <StatRow label="Paragraphs" value={stats.paragraphs} />
           <StatRow label="Sentences" value={stats.sentences} />
-          <StatRow label="Transitioned Sentences" value={stats.transitionedSentences} />
+          <StatRow label="Transitioned sentences" value={stats.transitionedSentences} />
         </div>
       </SectionCard>
 
-      <SectionCard title="Word Density">
+      <SectionCard title="Word density">
         <div className="mb-3 flex gap-1">
           <Button size="sm" variant={densityView === "oneWord" ? "default" : "outline"} onClick={() => setDensityView("oneWord")}>
-            1 Word
+            1 word
           </Button>
           <Button size="sm" variant={densityView === "twoWord" ? "default" : "outline"} onClick={() => setDensityView("twoWord")}>
-            2 Word
+            2 words
           </Button>
           <Button size="sm" variant={densityView === "threeWord" ? "default" : "outline"} onClick={() => setDensityView("threeWord")}>
-            3 Word
+            3 words
           </Button>
         </div>
         <div className="flex flex-col gap-1.5">
           {density.map((entry) => (
-            <div key={entry.word} className="flex items-center justify-between text-[13px]">
+            <div key={entry.word} className="flex items-center justify-between text-sm">
               <span className="text-foreground">{entry.word}</span>
               <span className="text-muted-foreground">
                 {entry.count} ({entry.pct}%)
@@ -94,10 +88,10 @@ export function ContentTab({ result }: { result: PageAuditResult }) {
               className="flex items-center gap-3"
               style={{ paddingLeft: `${(Number(heading.level.slice(1)) - 1) * 12}px` }}
             >
-              <span className="w-8 shrink-0 text-[11.5px] font-bold uppercase text-muted-foreground">
+              <span className="w-8 shrink-0 text-2xs font-medium uppercase text-muted-foreground">
                 {heading.level}
               </span>
-              <span className="flex-1 rounded-md border border-border bg-muted/30 px-3 py-1.5 text-[13px] text-foreground">
+              <span className="flex-1 rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground">
                 {heading.text}
               </span>
             </div>

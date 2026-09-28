@@ -1,10 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
-import { checkPlagiarism, editContent, generateContent } from "@/services/contentGeneration.service";
+import {
+  checkPlagiarism,
+  editContent,
+  generateContent,
+  generateContentFromTitle,
+} from "@/services/contentGeneration.service";
 import type { GeneratedContent } from "@/types/contentGeneration";
 
 export function useGenerateContent(projectId: string) {
   return useMutation({
     mutationFn: (url: string) => generateContent(projectId, url),
+  });
+}
+
+export function useGenerateContentFromTitle(projectId: string) {
+  return useMutation({
+    mutationFn: (title: string) => generateContentFromTitle(projectId, title),
   });
 }
 

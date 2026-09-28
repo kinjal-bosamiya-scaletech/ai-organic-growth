@@ -15,7 +15,7 @@ export function RouteErrorBoundary() {
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
-      <h1 className="text-lg font-bold text-foreground">{title}</h1>
+      <h1 className="text-lg font-semibold text-foreground">{title}</h1>
       <p className="max-w-sm text-sm text-muted-foreground">{message}</p>
       <Button onClick={() => navigate(-1)}>Go back</Button>
     </div>

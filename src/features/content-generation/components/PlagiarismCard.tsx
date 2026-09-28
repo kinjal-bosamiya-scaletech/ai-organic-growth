@@ -71,7 +71,7 @@ export function PlagiarismCard({ projectId, contentHtml }: PlagiarismCardProps) 
                     href={match.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:underline"
+                    className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-foreground underline decoration-border underline-offset-[3px] hover:decoration-foreground"
                   >
                     View <ExternalLink className="size-3" />
                   </a>
