@@ -13,7 +13,6 @@
 /* Imported here, not in GeoMap.tsx: that component is React.lazy-loaded, so Vite
    emits its CSS into the async chunk and injects it AFTER this stylesheet, which
    would make every override below lose the cascade tie. */
-@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -410,68 +409,6 @@
     .scroll-slim::-webkit-scrollbar-track {
         background: transparent;
     }
-}
-
-/* ---------------------------------------------------------------------
-   Leaflet. Stock leaflet.css ships its own light chrome - white popups
-   at 12px radius with a heavy shadow, and #f4f4f4 zoom buttons. Left
-   alone it is the most obvious "unstyled library" tell in the app.
-   --------------------------------------------------------------------- */
-.leaflet-container {
-    background: var(--muted);
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    outline: none;
-    /* Leaflet's panes and controls sit at z-index 400-1000, which floats them
-       over dialogs, sheets and dropdowns. Isolating the container keeps those
-       values scoped to the map instead of the page. */
-    position: relative;
-    z-index: 0;
-    isolation: isolate;
-}
-.leaflet-popup-content-wrapper,
-.leaflet-popup-tip {
-    background: var(--popover);
-    color: var(--popover-foreground);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--elev-lg);
-}
-.leaflet-popup-content {
-    margin: 0.625rem 0.75rem;
-    line-height: 1.45;
-}
-.leaflet-popup-close-button {
-    color: var(--muted-foreground) !important;
-    opacity: 1;
-}
-.leaflet-popup-close-button:hover {
-    color: var(--foreground) !important;
-}
-.leaflet-bar,
-.leaflet-bar a {
-    background: var(--card);
-    color: var(--foreground);
-    border-color: var(--border);
-    border-radius: var(--radius-md);
-}
-.leaflet-bar a:hover {
-    background: var(--accent);
-    color: var(--foreground);
-}
-.leaflet-control-attribution {
-    background: color-mix(in srgb, var(--card) 85%, transparent);
-    color: var(--muted-foreground);
-    font-size: 0.625rem;
-}
-.leaflet-control-attribution a {
-    color: var(--muted-foreground);
-    text-decoration: underline;
-}
-/* Stock Leaflet gives circle markers no visible focus at all. */
-.leaflet-interactive:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
 }
 
 /* ---------------------------------------------------------------------
