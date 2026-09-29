@@ -3,6 +3,26 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Anti-FOUC: apply the stored/system theme before first paint, so a
+         visitor who chose "dark" never sees a light flash. Mirrors
+         src/context/ThemeContext.tsx (same storage key). -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('ranky-theme');
+          var dark =
+            stored === 'dark' ||
+            (stored !== 'light' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var root = document.documentElement;
+          if (dark) root.classList.add('dark');
+          root.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {
+          /* Private mode / blocked storage — falls through to light. */
+        }
+      })();
+    </script>
     <title>Ranky AI — When Ads Say No, SEO Says Go</title>
     <meta
       name="description"
@@ -359,6 +379,38 @@
         </g>
       </symbol>
 
+      <symbol id="i-sun" viewBox="0 0 24 24">
+        <g
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2" />
+          <path d="M12 20v2" />
+          <path d="m4.93 4.93 1.41 1.41" />
+          <path d="m17.66 17.66 1.41 1.41" />
+          <path d="M2 12h2" />
+          <path d="M20 12h2" />
+          <path d="m6.34 17.66-1.41 1.41" />
+          <path d="m19.07 4.93-1.41 1.41" />
+        </g>
+      </symbol>
+
+      <symbol id="i-moon" viewBox="0 0 24 24">
+        <g
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+        </g>
+      </symbol>
+
       <symbol id="i-layers" viewBox="0 0 24 24">
         <g
           fill="none"
@@ -395,14 +447,56 @@
           <a class="nav__link" href="#features">Features</a>
         </nav>
 
-        <!-- data-demo: opens the #demo dialog (assets/main.js). The href is the
-             no-JS fallback — it reveals the same form inline via :target. -->
-        <a class="btn btn--primary btn--sm nav__cta" data-demo href="#demo">
-          Book a demo
-          <svg aria-hidden="true" viewBox="0 0 24 24">
-            <use href="#i-arrow-right" />
-          </svg>
-        </a>
+        <div class="nav__actions">
+          <!-- Theme toggle: JS-driven (assets/main.js), same storage key as
+               the app's ThemeContext. Without JS this stays invisible-but-
+               inert rather than a set of dead buttons. -->
+          <div class="theme-toggle" role="group" aria-label="Colour theme">
+            <button
+              type="button"
+              class="theme-toggle__btn"
+              data-theme-choice="light"
+              aria-label="Light"
+              aria-pressed="false"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <use href="#i-sun" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="theme-toggle__btn"
+              data-theme-choice="dark"
+              aria-label="Dark"
+              aria-pressed="false"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <use href="#i-moon" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="theme-toggle__btn"
+              data-theme-choice="system"
+              aria-label="System"
+              aria-pressed="false"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <use href="#i-monitor" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- data-demo: opens the #demo dialog (assets/main.js). The href is
+               the no-JS fallback — it reveals the same form inline via
+               :target. -->
+          <a class="btn btn--primary btn--sm nav__cta" data-demo href="#demo">
+            Book a demo
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <use href="#i-arrow-right" />
+            </svg>
+          </a>
+        </div>
       </div>
     </header>
 
@@ -439,8 +533,17 @@
           </div>
 
           <!-- Product mock: gauge + trend + issue queue -->
-          <div class="mock rise" style="--d: 0.3s" aria-hidden="true">
-            <span class="mock__badge"><i></i>LIVE</span>
+          <!-- Live, looping worked example (assets/main.js): scans, finds
+               3 real issues, fixes them one by one, and the score climbs
+               41 → 92 — then resets and runs again. Purely illustrative
+               (aria-hidden; the h1/lede carry the actual page content).
+               Without JS or with reduced motion it renders the finished
+               "after" state directly. -->
+          <div class="mock rise" style="--d: 0.3s" data-demo-player aria-hidden="true">
+            <span class="mock__badge" data-demo-phase data-phase="scanning">
+              <i></i>
+              <span data-demo-phase-text>Scanning</span>
+            </span>
 
             <div class="mock__bar">
               <span class="mock__dot"></span>
@@ -454,15 +557,22 @@
                 <svg viewBox="0 0 132 132">
                   <defs>
                     <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stop-color="#1FCB79" />
-                      <stop offset="100%" stop-color="#82DBB1" />
+                      <stop offset="0%" stop-color="#12D06A" />
+                      <stop offset="100%" stop-color="#7CE0A8" />
                     </linearGradient>
                   </defs>
                   <circle class="gauge__track" cx="66" cy="66" r="52" />
-                  <circle class="gauge__value" cx="66" cy="66" r="52" />
+                  <circle
+                    class="gauge__value"
+                    data-demo-ring
+                    cx="66"
+                    cy="66"
+                    r="52"
+                    style="stroke-dashoffset: 192.7"
+                  />
                 </svg>
                 <div class="gauge__label">
-                  <span class="gauge__num">78</span>
+                  <span class="gauge__num" data-demo-score>41</span>
                   <span class="gauge__cap">SEO HEALTH</span>
                 </div>
               </div>
@@ -477,12 +587,12 @@
                     <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop
                         offset="0%"
-                        stop-color="#1FCB79"
+                        stop-color="#12D06A"
                         stop-opacity="0.32"
                       />
                       <stop
                         offset="100%"
-                        stop-color="#1FCB79"
+                        stop-color="#12D06A"
                         stop-opacity="0"
                       />
                     </linearGradient>
@@ -500,28 +610,28 @@
             </div>
 
             <div class="rows">
-              <div class="row" style="--sev: #f87171">
+              <div class="row" data-demo-row style="--sev: #f87171">
                 <span class="row__sev"></span>
                 <span class="row__name">12 product pages not indexed</span>
-                <span class="row__tag">HIGH</span>
+                <span class="row__tag" data-demo-row-tag>HIGH</span>
               </div>
-              <div class="row" style="--sev: #f0a93b">
+              <div class="row" data-demo-row style="--sev: #f0a93b">
                 <span class="row__sev"></span>
                 <span class="row__name">Thin meta descriptions on 34 URLs</span>
-                <span class="row__tag">MEDIUM</span>
+                <span class="row__tag" data-demo-row-tag>MEDIUM</span>
               </div>
-              <div class="row" style="--sev: #5ca6e0">
+              <div class="row" data-demo-row style="--sev: #5ca6e0">
                 <span class="row__sev"></span>
                 <span class="row__name"
                   >Competitor outranks you on 8 keywords</span
                 >
-                <span class="row__tag">LOW</span>
+                <span class="row__tag" data-demo-row-tag>LOW</span>
               </div>
             </div>
 
             <div class="mock__foot">
               <svg viewBox="0 0 24 24"><use href="#i-sparkles" /></svg>
-              AI generated 3 ready-to-publish fixes
+              <span data-demo-foot>Scanning for indexing and content issues…</span>
             </div>
           </div>
         </div>
@@ -544,7 +654,7 @@
           </div>
 
           <div class="grid grid--3">
-            <article class="card reveal" style="--i: 0; --tint: #e5484d">
+            <article class="card reveal" style="--i: 0; --tint: #dc2626">
               <span class="icon"
                 ><svg viewBox="0 0 24 24"><use href="#i-ban" /></svg
               ></span>
@@ -555,7 +665,7 @@
               </p>
             </article>
 
-            <article class="card reveal" style="--i: 1; --tint: #0b6b3c">
+            <article class="card reveal" style="--i: 1; --tint: #078043">
               <span class="icon"
                 ><svg viewBox="0 0 24 24"><use href="#i-trending" /></svg
               ></span>
@@ -677,7 +787,7 @@
           </div>
 
           <div class="flow reveal">
-            <article class="step" style="--tint: #0b6b3c; --i: 0">
+            <article class="step" style="--tint: #078043; --i: 0">
               <span class="step__ring"
                 ><svg viewBox="0 0 24 24"><use href="#i-monitor" /></svg
               ></span>
@@ -744,7 +854,7 @@
               --y: 14%;
               --size: 34px;
               --delay: 0s;
-              --tint: #0b6b3c;
+              --tint: #078043;
             "
           >
             <svg viewBox="0 0 24 24"><use href="#i-search" /></svg>
@@ -849,7 +959,7 @@
           </div>
 
           <div class="grid grid--3">
-            <article class="card reveal" style="--i: 0; --tint: #0b6b3c">
+            <article class="card reveal" style="--i: 0; --tint: #078043">
               <span class="icon"
                 ><svg viewBox="0 0 24 24"><use href="#i-activity" /></svg
               ></span>
@@ -889,7 +999,7 @@
                 your target keywords.
               </p>
             </article>
-            <article class="card reveal" style="--i: 4; --tint: #0b6b3c">
+            <article class="card reveal" style="--i: 4; --tint: #078043">
               <span class="icon"
                 ><svg viewBox="0 0 24 24"><use href="#i-target" /></svg
               ></span>
@@ -899,7 +1009,7 @@
                 potential, not volume alone.
               </p>
             </article>
-            <article class="card reveal" style="--i: 5; --tint: #e5484d">
+            <article class="card reveal" style="--i: 5; --tint: #dc2626">
               <span class="icon"
                 ><svg viewBox="0 0 24 24"><use href="#i-dollar" /></svg
               ></span>
@@ -949,7 +1059,7 @@
               --y: 80%;
               --size: 36px;
               --delay: 1.2s;
-              --tint: #0b6b3c;
+              --tint: #078043;
             "
           >
             <svg viewBox="0 0 24 24"><use href="#i-activity" /></svg>
@@ -966,7 +1076,7 @@
           </div>
 
           <div class="bento">
-            <article class="card reveal" style="--i: 0; --tint: #0b6b3c">
+            <article class="card reveal" style="--i: 0; --tint: #078043">
               <span class="icon"
                 ><svg viewBox="0 0 24 24"><use href="#i-activity" /></svg
               ></span>
@@ -996,7 +1106,7 @@
                 High-potential keywords ranked by traffic and conversion value.
               </p>
             </article>
-            <article class="card reveal" style="--i: 4; --tint: #0b6b3c">
+            <article class="card reveal" style="--i: 4; --tint: #078043">
               <span class="icon"
                 ><svg viewBox="0 0 24 24"><use href="#i-sparkles" /></svg
               ></span>
@@ -1028,7 +1138,7 @@
           <div class="marquee__track">
             <div class="marquee__group">
               <a class="tool" data-demo href="#demo">
-                <span class="tool__icon" style="--tint: #0b6b3c">
+                <span class="tool__icon" style="--tint: #078043">
                   <svg aria-hidden="true" viewBox="0 0 24 24">
                     <use href="#i-link" />
                   </svg>
@@ -1069,7 +1179,7 @@
                 >
               </a>
               <a class="tool" data-demo href="#demo">
-                <span class="tool__icon" style="--tint: #0b6b3c">
+                <span class="tool__icon" style="--tint: #078043">
                   <svg aria-hidden="true" viewBox="0 0 24 24">
                     <use href="#i-type" />
                   </svg>
@@ -1081,7 +1191,7 @@
                 >
               </a>
               <a class="tool" data-demo href="#demo">
-                <span class="tool__icon" style="--tint: #e5484d">
+                <span class="tool__icon" style="--tint: #dc2626">
                   <svg aria-hidden="true" viewBox="0 0 24 24">
                     <use href="#i-file-text" />
                   </svg>

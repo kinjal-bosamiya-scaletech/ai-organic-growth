@@ -8,29 +8,40 @@
 /* ---------- Tokens ---------------------------------------------------- */
 
 :root {
-  /* Light surface (app :root) — nudged a shade darker/warmer than pure white
-     for a moodier, more premium feel across the light sections */
-  --bg: #eef1f0;
-  --surface: #fbfbfa;
-  --ink: #0e1726;
-  --muted: #6b7688;
-  --line: #e1e5e2;
-  --soft: #eef2ef;
+  color-scheme: light;
 
-  --green: #0b6b3c;
-  --green-lift: #1fcb79;
-  /* Darkened green reserved for small text on light surfaces (>= 4.5:1) */
-  --green-ink: #075c31;
+  /* Light surface — slate-tinted neutrals, matching src/index.css :root */
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --soft: #f1f5f9;
+
+  /* Brand fill — constant in both themes (#12D06A does not invert). Dark
+     ink text is required directly on the fill; white on it is 2.05:1. */
+  --brand: #12d06a;
+  --brand-foreground: #052e1a;
+  --brand-accent: #7ce0a8;
+
+  /* --green is the darkened, readable companion for green TEXT/icons on
+     light surfaces; --green-lift is the vivid fill for accents that
+     always sit on dark surfaces (hero, mock, CTA). */
+  --green: #078043;
+  --green-lift: var(--brand);
+  --green-ink: var(--green);
   --indigo: #5b5bd6;
   --indigo-soft: #ececfb;
   --amber: #e0900b;
   --blue: #3b82c4;
-  --red: #e5484d;
+  --red: #dc2626;
 
-  /* Dark surfaces (app .dark) */
-  --night: #0a0f0c;
-  --night-alt: #0e1015;
-  --night-card: #17181d;
+  /* Dark surfaces — the hero/CTA/footer bands are dark by design in both
+     themes. One step lighter than a near-black navy so they read as a
+     rich dark surface rather than pure black. */
+  --night: #0f172a;
+  --night-alt: #0d1526;
+  --night-card: #1e293b;
 
   /* Radius scale — --radius: 0.7rem and its multiples */
   --r: 0.7rem;
@@ -43,8 +54,8 @@
   --r-4xl: calc(var(--r) * 2.6);
 
   /* Depth — the app's long, low-opacity shadows */
-  --shadow-card: 0 18px 50px -30px rgba(14, 23, 38, 0.28);
-  --shadow-lift: 0 26px 60px -32px rgba(14, 23, 38, 0.34);
+  --shadow-card: 0 18px 50px -30px rgba(15, 23, 42, 0.28);
+  --shadow-lift: 0 26px 60px -32px rgba(15, 23, 42, 0.34);
   --shadow-green: 0 8px 28px -8px rgba(18, 208, 106, 0.7);
 
   --sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -52,6 +63,27 @@
 
   --nav-h: 68px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- Dark theme (toggled via .dark on <html>, mirrors src/index.css .dark) */
+
+:root.dark {
+  color-scheme: dark;
+
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --ink: #f1f5f9;
+  --muted: #94a3b8;
+  --line: #334155;
+  --soft: #1a2540;
+
+  --green: #34e084;
+  --indigo-soft: #253352;
+  --amber: #fbbf24;
+  --red: #f87171;
+
+  --shadow-card: 0 10px 28px -10px rgba(0, 0, 0, 0.75);
+  --shadow-lift: 0 28px 70px -28px rgba(0, 0, 0, 0.85);
 }
 
 /* ---------- Reset ----------------------------------------------------- */
@@ -147,7 +179,7 @@ section {
   background:
     radial-gradient(
       900px 420px at 50% -10%,
-      rgba(18, 161, 80, 0.05),
+      rgba(18, 208, 106, 0.05),
       transparent 70%
     ),
     var(--soft);
@@ -179,6 +211,19 @@ section {
   opacity: 0.07;
 }
 
+/* The source photos are opaque near-white/cream rectangles (no alpha), so a
+   flat low-opacity overlay dissolves into a *light* surface fine but leaves
+   a visible pale box on a *dark* one. Inverting swaps that backdrop for
+   near-black — which actually matches the dark surface — while the (now
+   light) linework still reads as a faint texture, same as it did in
+   reverse on light. */
+:root.dark #problem::before,
+:root.dark #tools::before,
+:root.dark #solution::before,
+:root.dark #features::before {
+  filter: grayscale(1) contrast(0.95) invert(1);
+}
+
 #problem::before {
   inset: 40px -40px auto auto;
   inline-size: 900px;
@@ -186,6 +231,10 @@ section {
   background-image: url('1211151614.png');
   background-position: top right;
   background-size: contain;
+  /* Feathers the image's own hard rectangular edge into the surface, so it
+     reads as a texture the background has rather than a photo laid over it. */
+  mask-image: radial-gradient(75% 75% at 100% 0%, #000 35%, transparent 100%);
+  -webkit-mask-image: radial-gradient(75% 75% at 100% 0%, #000 35%, transparent 100%);
 }
 
 #tools::before {
@@ -195,6 +244,8 @@ section {
   background-image: url('509804079.png');
   background-position: bottom left;
   background-size: contain;
+  mask-image: radial-gradient(75% 75% at 0% 100%, #000 35%, transparent 100%);
+  -webkit-mask-image: radial-gradient(75% 75% at 0% 100%, #000 35%, transparent 100%);
 }
 
 #solution::before {
@@ -205,6 +256,8 @@ section {
   background-position: top left;
   background-size: contain;
   opacity: 0.05;
+  mask-image: radial-gradient(75% 75% at 0% 0%, #000 35%, transparent 100%);
+  -webkit-mask-image: radial-gradient(75% 75% at 0% 0%, #000 35%, transparent 100%);
 }
 
 #features::before {
@@ -215,6 +268,8 @@ section {
   background-position: bottom right;
   background-size: contain;
   opacity: 0.05;
+  mask-image: radial-gradient(75% 75% at 100% 100%, #000 35%, transparent 100%);
+  -webkit-mask-image: radial-gradient(75% 75% at 100% 100%, #000 35%, transparent 100%);
 }
 
 [data-motion='on'] #problem::before,
@@ -301,8 +356,8 @@ section {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--green-ink);
-  border: 1px solid rgba(18, 161, 80, 0.28);
-  background: rgba(18, 161, 80, 0.07);
+  border: 1px solid rgba(18, 208, 106, 0.28);
+  background: rgba(18, 208, 106, 0.07);
   border-radius: 999px;
   padding: 6px 13px;
 }
@@ -348,7 +403,7 @@ h3 {
 }
 
 .grad {
-  background: linear-gradient(100deg, #1fcb79 0%, #82dbb1 100%);
+  background: linear-gradient(100deg, #12d06a 0%, #7ce0a8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -413,8 +468,8 @@ h3 {
 /* ---------- Buttons -------------------------------------------------- */
 
 .btn {
-  --btn-bg: var(--green);
-  --btn-fg: #fff;
+  --btn-bg: var(--brand);
+  --btn-fg: var(--brand-foreground);
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -445,7 +500,7 @@ h3 {
 }
 
 .btn--primary {
-  box-shadow: 0 10px 30px -14px rgba(18, 161, 80, 0.75);
+  box-shadow: 0 10px 30px -14px rgba(18, 208, 106, 0.75);
 }
 
 /* Sheen sweep on hover */
@@ -485,9 +540,9 @@ h3 {
   border-radius: var(--r-md);
 }
 
+/* --brand/--brand-foreground already match here — the fill never inverts,
+   only the ambient shadow gets stronger against a dark surface. */
 .night .btn--primary {
-  --btn-bg: var(--green-lift);
-  --btn-fg: #0b1a10;
   box-shadow: var(--shadow-green);
 }
 
@@ -496,7 +551,7 @@ h3 {
 }
 
 .btn--primary:hover {
-  box-shadow: 0 16px 38px -14px rgba(18, 161, 80, 0.85);
+  box-shadow: 0 16px 38px -14px rgba(18, 208, 106, 0.85);
 }
 
 .night .btn--primary:hover {
@@ -508,7 +563,7 @@ h3 {
 }
 
 .btn--ghost:hover {
-  border-color: rgba(18, 161, 80, 0.4);
+  border-color: rgba(18, 208, 106, 0.4);
 }
 
 .night .btn--ghost:hover {
@@ -559,7 +614,59 @@ h3 {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+/* Wraps the theme toggle + CTA so both stay pinned right, whether or not
+   .nav__links is present in the layout (it's hidden below 768px). */
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin-inline-start: auto;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.theme-toggle__btn {
+  display: grid;
+  place-items: center;
+  inline-size: 30px;
+  block-size: 30px;
+  border: none;
+  border-radius: 999px;
+  /* Buttons ship UA chrome (a light face + border) that isn't reset by the
+     global `button { font/color }` rule — without this, unpressed buttons
+     render as solid white/cream circles with the icon lost against them. */
+  appearance: none;
+  background: transparent;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.theme-toggle__btn svg {
+  inline-size: 15px;
+  block-size: 15px;
+}
+
+.theme-toggle__btn:hover {
+  color: #fff;
+}
+
+.theme-toggle__btn[aria-pressed='true'] {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
 }
 
 .nav__link {
@@ -599,7 +706,7 @@ h3 {
 
 /* Scrolled state — hairline + blur, set from main.js */
 .nav.is-stuck {
-  background: rgba(10, 15, 12, 0.72);
+  background: rgba(15, 23, 42, 0.72);
   backdrop-filter: blur(14px) saturate(140%);
   border-bottom-color: rgba(255, 255, 255, 0.09);
 }
@@ -626,7 +733,7 @@ h3 {
   background:
     radial-gradient(
       760px 560px at 8% 2%,
-      rgba(18, 161, 80, 0.36),
+      rgba(18, 208, 106, 0.36),
       transparent 62%
     ),
     radial-gradient(
@@ -636,8 +743,8 @@ h3 {
     ),
     linear-gradient(
       180deg,
-      rgba(10, 15, 12, 0.18) 0%,
-      rgba(10, 15, 12, 0.62) 62%,
+      rgba(15, 23, 42, 0.18) 0%,
+      rgba(15, 23, 42, 0.62) 62%,
       var(--night) 100%
     );
 }
@@ -685,7 +792,7 @@ h3 {
 .hero__no {
   color: rgba(255, 255, 255, 0.42);
   text-decoration: line-through;
-  text-decoration-color: rgba(229, 72, 77, 0.65);
+  text-decoration-color: rgba(220, 38, 38, 0.65);
   text-decoration-thickness: 3px;
 }
 
@@ -703,79 +810,17 @@ h3 {
   }
 }
 
-.pillars {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 34px;
-}
-
-.pillar {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(6px);
-  font-size: 15px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.86);
-}
-
-.pillar i {
-  inline-size: 6px;
-  block-size: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  color: var(--dot);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dot) 22%, transparent);
-}
-
-.pillar--boost {
-  border-color: color-mix(in srgb, var(--dot) 40%, transparent);
-  background: color-mix(in srgb, var(--dot) 16%, rgba(255, 255, 255, 0.07));
-  color: #fff;
-}
-
-.pillar--boost svg {
-  inline-size: 12px;
-  block-size: 12px;
-  color: var(--dot);
-}
-
-[data-motion='on'] .pillar--boost i {
-  animation: pulse 2.2s ease-in-out infinite;
-}
-
-.hero__note {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 40px;
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.hero__note::before {
-  content: '';
-  inline-size: 40px;
-  block-size: 1px;
-  background: rgba(255, 255, 255, 0.18);
-  flex: none;
-}
-
 /* ---------- Hero product mock ---------------------------------------- */
 
 .mock {
   position: relative;
   border-radius: var(--r-3xl);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Slate-blue, not neutral gray — matches the app's dark card → background */
   background: linear-gradient(
     165deg,
-    rgba(28, 32, 38, 0.92),
-    rgba(14, 18, 21, 0.94)
+    rgba(30, 41, 59, 0.92),
+    rgba(15, 23, 42, 0.94)
   );
   box-shadow:
     0 40px 90px -50px rgba(0, 0, 0, 0.9),
@@ -846,7 +891,7 @@ h3 {
   stroke-width: 9;
   stroke-linecap: round;
   stroke-dasharray: 326.7;
-  stroke-dashoffset: 71.9; /* 78 / 100 */
+  stroke-dashoffset: 192.7; /* 41 / 100 — the live example's starting score */
 }
 
 .gauge__label {
@@ -982,6 +1027,21 @@ h3 {
   white-space: nowrap;
 }
 
+/* A resolved issue — set by the live example (assets/main.js) as each fix
+   lands. The dot/tag recolour for free since JS repoints the row's own
+   --sev custom property at the brand green; only the strikethrough on the
+   name needs a rule of its own. */
+.row.is-fixed {
+  background: rgba(18, 208, 106, 0.06);
+  border-color: rgba(18, 208, 106, 0.18);
+}
+
+.row.is-fixed .row__name {
+  color: rgba(255, 255, 255, 0.48);
+  text-decoration: line-through;
+  text-decoration-color: rgba(255, 255, 255, 0.28);
+}
+
 .mock__foot {
   display: flex;
   align-items: center;
@@ -1019,12 +1079,33 @@ h3 {
   gap: 6px;
   padding: 6px 12px 6px 10px;
   border-radius: 999px;
-  background: linear-gradient(155deg, #ff5b5f, var(--red));
+  /* Default/"scanning" state — the live example (assets/main.js) recolours
+     this per phase as it runs: found (red) → fixing (amber) → done (brand
+     green), then loops back here. */
+  background: linear-gradient(155deg, #7c93e8, var(--indigo));
   color: #fff;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.04em;
-  box-shadow: 0 10px 26px -8px rgba(229, 72, 77, 0.65);
+  box-shadow: 0 10px 26px -8px rgba(91, 91, 214, 0.55);
+  transition:
+    background-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.mock__badge[data-phase='found'] {
+  background: linear-gradient(155deg, #ff5b5f, var(--red));
+  box-shadow: 0 10px 26px -8px rgba(220, 38, 38, 0.6);
+}
+
+.mock__badge[data-phase='fixing'] {
+  background: linear-gradient(155deg, #f5c563, var(--amber));
+  box-shadow: 0 10px 26px -8px rgba(224, 144, 11, 0.55);
+}
+
+.mock__badge[data-phase='done'] {
+  background: linear-gradient(155deg, var(--brand-accent), var(--brand));
+  box-shadow: var(--shadow-green);
 }
 
 .mock__badge i {
@@ -1083,7 +1164,7 @@ h3 {
   background: linear-gradient(
     100deg,
     transparent 30%,
-    rgba(11, 107, 60, 0.08) 50%,
+    rgba(18, 208, 106, 0.08) 50%,
     transparent 70%
   );
   transform: translateX(-120%);
@@ -1094,7 +1175,7 @@ h3 {
 .card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lift);
-  border-color: rgba(18, 161, 80, 0.24);
+  border-color: rgba(18, 208, 106, 0.24);
 }
 
 .card:hover::after {
@@ -1127,16 +1208,6 @@ h3 {
 
 .card:hover .icon {
   transform: scale(1.08) rotate(-4deg);
-}
-
-.card__num {
-  position: absolute;
-  top: 20px;
-  right: 24px;
-  font-family: var(--mono);
-  font-size: 14px;
-  font-weight: 700;
-  color: color-mix(in srgb, var(--ink) 22%, transparent);
 }
 
 /* ---------- Problem: challenge list --------------------------------- */
@@ -1261,7 +1332,7 @@ h3 {
   gap: 15px;
   padding: 18px 20px;
   border-radius: var(--r-xl);
-  border: 1.5px solid rgba(18, 161, 80, 0.4);
+  border: 1.5px solid rgba(18, 208, 106, 0.4);
   box-shadow: 0 18px 40px -20px rgba(130, 219, 177, 0.45);
 }
 
@@ -1446,7 +1517,7 @@ h3 {
 
 .node:hover {
   transform: translateY(-3px);
-  border-color: rgba(18, 161, 80, 0.28);
+  border-color: rgba(18, 208, 106, 0.28);
   box-shadow: var(--shadow-card);
 }
 
@@ -1602,8 +1673,8 @@ h3 {
 
 .tool:hover {
   transform: translateY(-4px);
-  border-color: rgba(18, 161, 80, 0.32);
-  box-shadow: 0 18px 34px -22px rgba(18, 161, 80, 0.5);
+  border-color: rgba(18, 208, 106, 0.32);
+  box-shadow: 0 18px 34px -22px rgba(18, 208, 106, 0.5);
 }
 
 .tool:hover .tool__icon {
@@ -1718,7 +1789,7 @@ h3 {
 }
 
 .modal::backdrop {
-  background: rgba(8, 12, 10, 0.66);
+  background: rgba(7, 11, 21, 0.66);
   backdrop-filter: blur(6px);
 }
 
@@ -1728,7 +1799,7 @@ h3 {
   border-radius: var(--r-3xl);
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: 0 44px 90px -44px rgba(8, 12, 10, 0.7);
+  box-shadow: 0 44px 90px -44px rgba(7, 11, 21, 0.7);
   max-block-size: calc(100dvh - 40px);
   overflow-y: auto;
 }
@@ -1825,35 +1896,43 @@ h3 {
   outline: none;
   border-color: var(--green);
   background: var(--surface);
-  box-shadow: 0 0 0 3px rgba(18, 161, 80, 0.15);
+  box-shadow: 0 0 0 3px rgba(18, 208, 106, 0.15);
 }
 
 /* Only flag a field once the visitor has actually tried to fill it in */
 .field input:user-invalid,
 .field textarea:user-invalid {
   border-color: var(--red);
-  box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.13);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 13%, transparent);
 }
 
 .modal__error {
   margin-top: 16px;
   padding: 11px 13px;
   border-radius: var(--r-md);
-  border: 1px solid rgba(229, 72, 77, 0.3);
-  background: rgba(229, 72, 77, 0.07);
+  border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
+  background: color-mix(in srgb, var(--red) 7%, transparent);
   font-size: 15.5px;
-  color: #b3272c;
+  /* var(--red) is the same AA-validated pair the app uses for negative
+     text (4.83:1 light / 6.14:1 dark) — no separate ink needed. */
+  color: var(--red);
 }
 
 .modal__note {
   margin-top: 16px;
   padding: 11px 13px;
   border-radius: var(--r-md);
-  border: 1px solid rgba(224, 144, 11, 0.32);
-  background: rgba(224, 144, 11, 0.08);
+  border: 1px solid color-mix(in srgb, var(--amber) 32%, transparent);
+  background: color-mix(in srgb, var(--amber) 8%, transparent);
   font-size: 15.5px;
   line-height: 1.55;
+  /* --amber is a decorative hue, not an AA-checked text colour, so the
+     warning message keeps its own validated ink per theme. */
   color: #8a5804;
+}
+
+:root.dark .modal__note {
+  color: #fbbf24;
 }
 
 .modal__submit {
@@ -1901,7 +1980,7 @@ h3 {
   block-size: 54px;
   margin: 0 auto;
   border-radius: 50%;
-  background: rgba(18, 161, 80, 0.12);
+  background: rgba(18, 208, 106, 0.12);
   color: var(--green);
 }
 
@@ -1980,16 +2059,10 @@ body.modal-open {
   }
 }
 
-/* Gauge ring + sparkline draw-on */
-[data-motion='on'] .gauge__value {
-  stroke-dashoffset: 326.7;
-  transition: stroke-dashoffset 1.6s var(--ease) 0.35s;
-}
-
-[data-motion='on'] .mock.is-visible .gauge__value {
-  stroke-dashoffset: 71.9;
-}
-
+/* Sparkline draw-on. The gauge ring has no equivalent rule: the hero mock
+   is now the live, looping worked example (assets/main.js drives
+   .gauge__value's stroke-dashoffset directly on its own easing/loop), so a
+   CSS transition here would fight that animation. */
 [data-motion='on'] .spark__line {
   stroke-dashoffset: 460;
   transition: stroke-dashoffset 1.7s var(--ease) 0.5s;
@@ -2223,14 +2296,6 @@ body.modal-open {
     display: none;
   }
 
-  .nav__inner {
-    justify-content: space-between;
-  }
-
-  .nav__cta {
-    margin-inline-start: auto;
-  }
-
   .flow {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2243,6 +2308,15 @@ body.modal-open {
 @media (max-width: 620px) {
   .wrap {
     padding-inline: 18px;
+  }
+
+  .nav__actions {
+    gap: 8px;
+  }
+
+  .theme-toggle__btn {
+    inline-size: 26px;
+    block-size: 26px;
   }
 
   .mock__body {
