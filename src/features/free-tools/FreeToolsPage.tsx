@@ -22,7 +22,7 @@ export function FreeToolsPage() {
       id: 'core-web-vitals',
       name: 'Page Speed Insights',
       icon: '⚡',
-      to: `/app/${project.id}/free-tools/core-web-vitals`,
+      // to: `/app/${project.id}/free-tools/core-web-vitals`,
     },
     {
       id: 'built-with',
@@ -59,10 +59,13 @@ export function FreeToolsPage() {
     // { id: 'article-rewriter', name: 'Article Rewriter', icon: '✏️' },
   ];
 
+  // Live tools first, coming-soon ones last (sort is stable, so original order is kept within each group).
+  const sortedTools = [...TOOLS].sort((a, b) => Number(!a.to) - Number(!b.to));
+
   return (
     <div className="flex flex-col gap-6">
       <Callout title="More tools coming soon">
-        Link Gap, Page Audit, Core Web Vitals, Case Converter, Small Text Generator, Article/Blog Title
+        Page Audit, Case Converter, Small Text Generator, Article/Blog Title
         Generator, and Built With are live now — look for the "Live" badge below. The rest are under
         development for {project.domain}.
       </Callout>
@@ -75,7 +78,7 @@ export function FreeToolsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {TOOLS.map((tool) => (
+        {sortedTools.map((tool) => (
           <ToolCard
             key={tool.id}
             name={tool.name}

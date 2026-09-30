@@ -46,7 +46,7 @@ export function AiRecommendationsPreview({
       </div>
       <Button className="mt-4 w-full" onClick={() => navigate(`/app/${projectId}/competitors`)}>
         <Sparkles className="size-4" />
-        View all recommendations
+        View All Recommendations
       </Button>
     </SectionCard>
   );

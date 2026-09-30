@@ -15,7 +15,7 @@ export function ProjectCard({ project, onConnect }: Readonly<ProjectCardProps>) 
     ? [
         { label: "Clicks / 28d", value: project.metrics.clicks },
         { label: "Impressions", value: project.metrics.impressions },
-        { label: "Avg position", value: project.metrics.avgPosition },
+        { label: "Avg Position", value: project.metrics.avgPosition },
       ]
     : [];
 
@@ -44,7 +44,7 @@ export function ProjectCard({ project, onConnect }: Readonly<ProjectCardProps>) 
       {project.connected && stats.length > 0 ? (
         <dl className="flex gap-2">
           {stats.map((stat) => (
-            <div key={stat.label} className="flex-1 rounded-md bg-muted px-3 py-2.5">
+            <div key={stat.label} className="flex-1 rounded-md bg-muted px-3 py-2.5 text-center">
               <dt className="text-2xs font-medium tracking-[0.08em] text-muted-foreground uppercase">
                 {stat.label}
               </dt>
@@ -60,7 +60,7 @@ export function ProjectCard({ project, onConnect }: Readonly<ProjectCardProps>) 
 
       {project.connected ? (
         <Button size="lg" onClick={() => navigate(`/app/${project.id}/dashboard`)}>
-          Open dashboard
+          Open Dashboard
         </Button>
       ) : (
         <Button variant="outline" onClick={() => onConnect(project)}>

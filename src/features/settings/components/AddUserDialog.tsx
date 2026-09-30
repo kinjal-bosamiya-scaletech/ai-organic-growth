@@ -66,7 +66,7 @@ export function AddUserDialog() {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button size="sm" />}>
         <Plus className="size-3.5" />
-        Add user
+        Add User
       </DialogTrigger>
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
@@ -146,7 +146,7 @@ export function AddUserDialog() {
           <DialogFooter className="-mx-0 -mb-0 border-t-0 bg-transparent p-0 pt-1">
             <Button type="submit" disabled={createUser.isPending} className="w-full sm:w-auto">
               {createUser.isPending && <Loader2 className="size-3.5 animate-spin" />}
-              Create user
+              Create User
             </Button>
           </DialogFooter>
         </form>

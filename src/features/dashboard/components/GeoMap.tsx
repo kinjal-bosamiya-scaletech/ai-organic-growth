@@ -27,10 +27,23 @@ const ALIASES: Record<string, string> = {
 };
 
 const MAX_ZOOM = 8;
-// equalEarth outline aspect, and the fraction of its height by which the
-// populated latitudes (83.6°N to 55.9°S, Antarctica dropped) sit above centre.
-const OUTLINE_ASPECT = 2.0548;
-const CENTER_K = 0.052;
+// Flat (equirectangular) map cropped to the populated latitudes, 83.6°N to
+// 55.9°S (Antarctica dropped), so the map fills the frame with no empty bands.
+const LAT_N = 84;
+const LAT_S = -56;
+const OUTLINE_ASPECT = 360 / (LAT_N - LAT_S);
+// Fraction of the outline height by which its centre sits above the projection
+// origin (lat 0). Zooming scales around the origin, so this keeps zoom centred.
+const CENTER_K = (LAT_N + LAT_S) / 2 / (LAT_N - LAT_S);
+const OUTLINE = {
+  type: "MultiPoint",
+  coordinates: [
+    [-180, LAT_N],
+    [180, LAT_N],
+    [180, LAT_S],
+    [-180, LAT_S],
+  ],
+};
 
 const topology = worldTopology as unknown as Topology<{ countries: GeometryCollection }>;
 const countries = (feature(topology, topology.objects.countries) as FeatureCollection<Geometry, { name: string }>).features.filter(
@@ -80,6 +93,18 @@ export function GeoMap({ data, focusedCountry }: Readonly<GeoMapProps>) {
   // Rendered height of the (width- or height-limited) world outline.
   const mapHeight = Math.min(size.h - 16, (size.w - 16) / OUTLINE_ASPECT);
 
+  // Keep the viewport filled: pan may only reach the edge of the map, never past it.
+  const clampPan = useCallback(
+    (p: { x: number; y: number }, z: number) => {
+      const limit = (content: number, view: number) => Math.max(0, (content - view) / 2);
+      const maxX = limit(mapHeight * OUTLINE_ASPECT * z, size.w);
+      const maxY = limit(mapHeight * z, size.h);
+      return { x: Math.min(maxX, Math.max(-maxX, p.x)), y: Math.min(maxY, Math.max(-maxY, p.y)) };
+    },
+    [mapHeight, size.w, size.h],
+  );
+  const viewPan = useMemo(() => clampPan(pan, zoom), [clampPan, pan, zoom]);
+
   const changeZoom = useCallback((factor: number) => {
     setZoom((current) => {
       const z = Math.min(MAX_ZOOM, Math.max(1, current * factor));
@@ -112,12 +137,12 @@ export function GeoMap({ data, focusedCountry }: Readonly<GeoMapProps>) {
   const onPointerDown = (e: React.PointerEvent) => {
     if (zoom <= 1 || (e.target as HTMLElement).closest("button")) return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    dragRef.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+    dragRef.current = { x: e.clientX, y: e.clientY, panX: viewPan.x, panY: viewPan.y };
   };
   const onPointerMove = (e: React.PointerEvent) => {
     const d = dragRef.current;
     if (!d) return;
-    setPan({ x: d.panX + e.clientX - d.x, y: d.panY + e.clientY - d.y });
+    setPan(clampPan({ x: d.panX + e.clientX - d.x, y: d.panY + e.clientY - d.y }, zoom));
   };
   const onPointerUp = () => {
     dragRef.current = null;
@@ -144,6 +169,7 @@ export function GeoMap({ data, focusedCountry }: Readonly<GeoMapProps>) {
         datasets: [
           {
             label: "Clicks",
+            outline: OUTLINE,
             data: rows.map((r) => ({ feature: r.feature, value: r.geo?.clicks ?? 0 })),
             backgroundColor: (ctx?: { dataIndex: number }) => fill(ctx ? rows[ctx.dataIndex] : undefined),
             hoverBackgroundColor: (ctx?: { dataIndex: number }) =>
@@ -192,16 +218,16 @@ export function GeoMap({ data, focusedCountry }: Readonly<GeoMapProps>) {
         scales: {
           projection: {
             axis: "x",
-            projection: "equalEarth",
+            projection: "equirectangular",
             padding: 8,
             projectionScale: zoom,
-            projectionOffset: [pan.x, pan.y + CENTER_K * mapHeight * zoom],
+            projectionOffset: [viewPan.x, viewPan.y + CENTER_K * mapHeight * (zoom - 1)],
           },
           color: { axis: "x", display: false, legend: { display: false } },
         },
       },
     } as unknown as ChartConfiguration<"choropleth">;
-  }, [rows, maxClicks, tokens, zoom, pan, mapHeight]);
+  }, [rows, maxClicks, tokens, zoom, viewPan, mapHeight]);
 
   // Selecting a country in the list pins its tooltip on the map.
   useEffect(() => {
@@ -257,7 +283,7 @@ export function GeoMap({ data, focusedCountry }: Readonly<GeoMapProps>) {
           type="button"
           className={btn}
           aria-label="Reset view"
-          disabled={zoom === 1 && pan.x === 0 && pan.y === 0}
+          disabled={zoom === 1 && viewPan.x === 0 && viewPan.y === 0}
           onClick={() => {
             setZoom(1);
             setPan({ x: 0, y: 0 });

@@ -7,7 +7,7 @@ export function PlanCard({ description }: { description: string }) {
     <SectionCard title="Plan">
       <p className="mb-3.5 text-sm text-muted-foreground">{description}</p>
       <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => toast.info("Upgrades are coming soon.")}>
-        Upgrade plan
+        Upgrade Plan
       </Button>
     </SectionCard>
   );

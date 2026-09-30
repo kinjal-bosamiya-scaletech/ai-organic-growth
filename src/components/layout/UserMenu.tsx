@@ -1,10 +1,13 @@
 import { LogOut } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
+import { SignOutConfirmDialog } from "@/components/common/SignOutConfirmDialog";
 import { useAuth } from "@/hooks/useAuth";
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleSignOut = () => {
     signOut();
@@ -23,13 +26,14 @@ export function UserMenu() {
         </span>
         <button
           type="button"
-          onClick={handleSignOut}
-          title="Sign out"
+          onClick={() => setConfirmOpen(true)}
+          title="Sign Out"
           className="cursor-pointer rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <LogOut className="size-4" />
         </button>
       </div>
+      <SignOutConfirmDialog open={confirmOpen} onOpenChange={setConfirmOpen} onConfirm={handleSignOut} />
     </div>
   );
 }

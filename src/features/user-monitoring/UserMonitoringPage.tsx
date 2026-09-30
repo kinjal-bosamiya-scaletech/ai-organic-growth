@@ -34,7 +34,9 @@ export function UserMonitoringPage() {
       <AppHeader
         left={
           <>
+            <Link to="/projects" aria-label="All projects" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <Logo iconSize={30} />
+            </Link>
             <Link
               to="/projects"
               className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
@@ -49,7 +51,7 @@ export function UserMonitoringPage() {
             <ThemeToggle />
             <span className="hidden text-sm text-muted-foreground sm:inline">{user?.fullName}</span>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
-              Sign out
+              Sign Out
             </Button>
           </>
         }
