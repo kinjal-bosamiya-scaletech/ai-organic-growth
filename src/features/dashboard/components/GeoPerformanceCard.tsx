@@ -4,7 +4,7 @@ import { PageLoader } from "@/components/common/PageLoader";
 import type { GeoDatum } from "@/types/geo";
 import { GeoCountryList } from "@/features/dashboard/components/GeoCountryList";
 
-// Leaflet is a heavy dependency only needed on this one card — split it into its own chunk.
+// The geo chart and world polygons are only needed on this one card — split them into their own chunk.
 const GeoMap = lazy(() => import("@/features/dashboard/components/GeoMap").then((m) => ({ default: m.GeoMap })));
 
 interface GeoPerformanceCardProps {
@@ -38,7 +38,7 @@ export function GeoPerformanceCard({ data }: GeoPerformanceCardProps) {
       }
     >
       <p className="-mt-3 mb-3.5 text-sm text-muted-foreground">
-        Clicks &amp; impressions by country · last 28 days · tap a country to zoom
+        Clicks &amp; impressions by country · last 28 days · hover a country for details
       </p>
       <div className="grid grid-cols-1 gap-4.5 lg:grid-cols-[1.7fr_1fr]">
         <div className="h-[380px] overflow-hidden rounded-xl border border-border bg-muted">

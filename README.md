@@ -18,7 +18,7 @@ entirely on **mock data** behind a feature flag so it can be pointed at the real
 | Server state | TanStack Query |
 | HTTP client | axios (wrapped in `services/http.service.ts`) |
 | Charts | chart.js + react-chartjs-2 |
-| Map | react-leaflet + leaflet (lazy-loaded) |
+| Map | chartjs-chart-geo + world-atlas (lazy-loaded, no API key) |
 | Notifications | react-toastify |
 | Icons | lucide-react |
 

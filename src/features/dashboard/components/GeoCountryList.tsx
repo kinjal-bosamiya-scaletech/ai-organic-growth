@@ -8,7 +8,7 @@ interface GeoCountryListProps {
 
 /**
  * The ranked counterpart to the map. This list is also the map's required
- * relief channel: bubble fills sit at 0.18 alpha, far below a readable
+ * relief channel: area fills are translucent, below a readable
  * contrast, so the figures must be available in text right beside it.
  */
 export function GeoCountryList({ data, onSelect }: Readonly<GeoCountryListProps>) {
@@ -55,7 +55,7 @@ export function GeoCountryList({ data, onSelect }: Readonly<GeoCountryListProps>
         ))}
       </div>
       <div className="mt-auto pt-3 text-2xs leading-relaxed text-muted-foreground">
-        Circle size reflects clicks. Flagged regions have below-average CTR.
+        Shading reflects clicks. Flagged regions have below-average CTR.
       </div>
     </div>
   );
