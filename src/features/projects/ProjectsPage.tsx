@@ -19,7 +19,7 @@ import { USE_MOCKS } from '@/lib/mockDelay';
 import type { Project } from '@/types/project';
 
 export function ProjectsPage() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { data: projects, isLoading, isError, refetch } = useProjects();
   const connectMutation = useConnectProject();
