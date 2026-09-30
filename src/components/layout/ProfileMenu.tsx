@@ -9,16 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { displayName } from "@/lib/displayName";
 import { useAuth } from "@/hooks/useAuth";
-
-/** "montu.khant@x.com" -> "Montu Khant". Falls back to the account's full name. */
-function displayName(fullName: string | undefined, email: string | undefined): string {
-  const local = email?.split("@")[0] ?? "";
-  const words = local.split(/[._\-+\d]+/).filter(Boolean);
-  if (words.length > 1) return words.map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(" ");
-  const base = fullName || local;
-  return base ? base[0].toUpperCase() + base.slice(1) : "";
-}
 
 /** Initial-in-a-circle profile button; hovering opens name, email and sign out. */
 export function ProfileMenu() {
