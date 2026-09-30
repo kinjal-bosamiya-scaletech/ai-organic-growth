@@ -24,7 +24,9 @@ export function Sidebar({ project }: SidebarProps) {
     // and the project name and domain below both truncate.
     <aside className="flex h-full w-65 shrink-0 flex-col border-r border-border bg-card">
       <div className="flex h-14 items-center border-b border-border px-5">
-        <Logo iconSize={30} />
+        <Link to="/projects" aria-label="All projects" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Logo iconSize={30} />
+        </Link>
       </div>
 
       <div className="p-3 pb-1">

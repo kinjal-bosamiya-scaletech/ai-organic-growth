@@ -101,7 +101,7 @@ export function AllPagesCard({ projectId }: { projectId: string }) {
             {lastSynced ? <span className="text-xs text-muted-foreground">Last synced {lastSynced}</span> : null}
             <Button size="sm" variant="outline" onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}>
               {syncMutation.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
-              Sync pages
+              Sync Pages
             </Button>
           </div>
         </div>

@@ -26,7 +26,7 @@ export function GeoCountryList({ data, onSelect }: Readonly<GeoCountryListProps>
             key={geo.country}
             type="button"
             onClick={() => onSelect(geo)}
-            className="flex items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+            className="mb-1.5 flex cursor-pointer items-center gap-2.5 rounded-md border border-border px-2 py-2 text-left transition-colors outline-none hover:border-brand-soft-border hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
           >
             {/* A rank numeral replaces the colour-only status dot, which
                 carried its meaning in hue alone. */}

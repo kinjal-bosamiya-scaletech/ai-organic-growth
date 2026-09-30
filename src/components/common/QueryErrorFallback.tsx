@@ -26,7 +26,7 @@ export function QueryErrorFallback({
       {onRetry ? (
         <Button variant="outline" size="sm" onClick={onRetry} className="mt-1">
           <RefreshCw />
-          Try again
+          Try Again
         </Button>
       ) : null}
     </div>

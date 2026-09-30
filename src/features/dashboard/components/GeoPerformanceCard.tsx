@@ -31,7 +31,7 @@ export function GeoPerformanceCard({ data }: GeoPerformanceCardProps) {
       title="Search performance by region"
       action={
         topCountrySummary ? (
-          <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+          <span className="rounded-full border border-brand-soft-border bg-brand-soft px-2.5 py-1 text-xs font-medium text-brand-ink">
             {topCountrySummary}
           </span>
         ) : undefined

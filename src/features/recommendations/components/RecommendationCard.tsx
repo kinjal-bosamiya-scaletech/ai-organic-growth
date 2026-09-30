@@ -57,7 +57,7 @@ export function RecommendationCard({ recommendation, onApply, isApplying }: Reco
               {isApplying ? "Applying…" : "Apply fix"}
             </Button>
             <Button size="sm" variant="outline">
-              View details
+              View Details
             </Button>
             <Button size="sm" variant="ghost" className="text-muted-foreground">
               Dismiss
