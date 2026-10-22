@@ -26,6 +26,7 @@ export const projectsMock: Project[] = [
     letter: "L",
     color: "#5B5BD6",
     connected: true,
+    gscGrant: "expired",
     metrics: { clicks: "12.7K", impressions: "640K", avgPosition: "21.8" },
   },
   {
