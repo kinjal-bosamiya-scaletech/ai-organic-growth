@@ -9,5 +9,5 @@ import type { BestKeywordsResult } from "@/types/bestKeywords";
 
 export async function findBestKeywords(url: string): Promise<BestKeywordsResult> {
   if (USE_MOCKS) return mockDelay(buildBestKeywordsMock(url), 1200);
-  return httpService.post<BestKeywordsResult>(API_CONFIG.bestKeywords, { url }, { isPublic: true });
+  return httpService.post<BestKeywordsResult>(API_CONFIG.bestKeywords, { url });
 }

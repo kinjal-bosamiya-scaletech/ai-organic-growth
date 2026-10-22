@@ -9,5 +9,5 @@ import type { BuiltWithResult } from "@/types/builtWith";
 
 export async function runBuiltWith(url: string): Promise<BuiltWithResult> {
   if (USE_MOCKS) return mockDelay(buildBuiltWithMock(url), 1200);
-  return httpService.post<BuiltWithResult>(API_CONFIG.builtWith, { url }, { isPublic: true });
+  return httpService.post<BuiltWithResult>(API_CONFIG.builtWith, { url });
 }
